@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://statelesssquad.github.io/stateless-squad-game-publisher-public/sitemap.xml

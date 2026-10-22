@@ -1,0 +1,16 @@
+{
+  "name": "StateLess Squad",
+  "short_name": "StateLess Squad",
+  "description": "StateLess Squad makes small, bright games for phones and the web: a kids' word garden, a tower of light, a vibecoder's endless runner, a merge puzzle and more. No ads, no accounts, no tracking, and they all play offline.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b0816",
+  "theme_color": "#7c5cff",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
