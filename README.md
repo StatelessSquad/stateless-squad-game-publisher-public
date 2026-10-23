@@ -6,6 +6,8 @@ Live at https://statelesssquad.github.io/stateless-squad-game-publisher-public/
 
 This folder is a build output of `stateless-squad-game-publisher`; do not edit it by hand.
 
+- [Slingstar](https://statelesssquad.github.io/slingstar-public/): Tap. Sling. Shine.
+- [Snike](https://statelesssquad.github.io/snike-public/): Eat the light. Grow legs. Bite the dark.
 - [Promptstorm](https://statelesssquad.github.io/promptstorm-public/): Vibe code. Dodge the hype.
 - [Aurolith](https://statelesssquad.github.io/aurolith-public/): Slice light. Climb to stars.
 - [Word Garden](https://statelesssquad.github.io/word-garden-public/): Hear it. Find it. Grow it.
