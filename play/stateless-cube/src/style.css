@@ -1,0 +1,1831 @@
+/* StateLess-Cube — the design system.
+ *
+ * Architecture (kept from AGENTS.md):
+ *   - .tile carries only the position transform (--r / --c) + transition.
+ *   - Scale/pop/pulse animations live on .tile-inner so they never fight the
+ *     position transform. SLIDE_MS (JS) and --slide (CSS) stay equal.
+ *   - Tile gradients/colours come from JS per theme (custom properties on
+ *     .tile-inner); this file handles layout, motion and the goal-tile glow.
+ *
+ * The look: glass surfaces over an aurora backdrop, duotone candy tiles with
+ * a specular highlight, spring motion, and a bento-ish HUD.
+ */
+
+/* ==========================================================================
+ * Tokens
+ * ========================================================================== */
+
+:root {
+  --bg: #fff6f1;
+  --bg-2: #ffe9f3;
+  --surface: rgba(255, 255, 255, 0.58);
+  --surface-strong: rgba(255, 255, 255, 0.86);
+  --surface-2: rgba(255, 255, 255, 0.34);
+  --border: rgba(255, 255, 255, 0.75);
+  --stroke: rgba(110, 70, 150, 0.14);
+  --text: #2d2142;
+  --muted: #7d7096;
+  --board: rgba(255, 255, 255, 0.42);
+  --cell: rgba(255, 255, 255, 0.5);
+  --cell-edge: rgba(255, 255, 255, 0.7);
+  --accent: #ff3fa4;
+  --accent-2: #7c5cff;
+  --accent-ink: #ffffff;
+  --shadow-soft: 0 12px 30px -14px rgba(101, 55, 150, 0.45);
+  --shadow-lift: 0 26px 50px -22px rgba(101, 55, 150, 0.55);
+  --shadow-tile: 0 10px 18px -8px rgba(70, 30, 110, 0.45);
+
+  --theme-accent: #ff3fa4;
+  --theme-accent-2: #7c5cff;
+
+  --gap: clamp(8px, 2.4vmin, 14px);
+  --radius-xl: 34px;
+  --radius-lg: 26px;
+  --radius-md: 18px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --slide: 120ms; /* keep in sync with SLIDE_MS in script.js */
+}
+
+html[data-theme="dark"],
+html[data-theme="system"] {
+  --bg: #0a0814;
+  --bg-2: #171030;
+  --surface: rgba(255, 255, 255, 0.07);
+  --surface-strong: rgba(28, 22, 52, 0.86);
+  --surface-2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.12);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --text: #f4effd;
+  --muted: #a294c4;
+  --board: rgba(255, 255, 255, 0.045);
+  --cell: rgba(255, 255, 255, 0.06);
+  --cell-edge: rgba(255, 255, 255, 0.08);
+  --shadow-soft: 0 14px 34px -16px rgba(0, 0, 0, 0.8);
+  --shadow-lift: 0 30px 60px -26px rgba(0, 0, 0, 0.9);
+  --shadow-tile: 0 10px 20px -10px rgba(0, 0, 0, 0.8);
+}
+
+/* Follow the OS when no manual choice is stored. */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) {
+    --bg: #0a0814;
+    --bg-2: #171030;
+    --surface: rgba(255, 255, 255, 0.07);
+    --surface-strong: rgba(28, 22, 52, 0.86);
+    --surface-2: rgba(255, 255, 255, 0.04);
+    --border: rgba(255, 255, 255, 0.12);
+    --stroke: rgba(255, 255, 255, 0.1);
+    --text: #f4effd;
+    --muted: #a294c4;
+    --board: rgba(255, 255, 255, 0.045);
+    --cell: rgba(255, 255, 255, 0.06);
+    --cell-edge: rgba(255, 255, 255, 0.08);
+    --shadow-soft: 0 14px 34px -16px rgba(0, 0, 0, 0.8);
+    --shadow-lift: 0 30px 60px -26px rgba(0, 0, 0, 0.9);
+    --shadow-tile: 0 10px 20px -10px rgba(0, 0, 0, 0.8);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  /* Always cover the whole viewport: on iOS the webview can be shorter than
+     the screen (home indicator), and the page must not leave a bare band. */
+  min-height: 100dvh;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI",
+    Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* The app fills the height and the board absorbs the slack, so the content
+     never overflows above the safe area (which would hide the header). */
+  justify-content: flex-start;
+  /* Keep the header clear of the status bar / Dynamic Island and the footer
+     clear of the home indicator (the app runs edge-to-edge on iOS). */
+  padding-top: calc(clamp(10px, 3vmin, 22px) + env(safe-area-inset-top));
+  padding-bottom: calc(clamp(10px, 3vmin, 22px) + env(safe-area-inset-bottom));
+  padding-left: 16px;
+  padding-right: 16px;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+
+/* On a phone every backdrop-filter forces a backdrop snapshot. Keep the live
+ * blur for the board (one element, the most visible) and use plain
+ * translucent surfaces for the rest. */
+@media (hover: none), (pointer: coarse) {
+  .icon-btn,
+  .pill,
+  .chip,
+  .hud-card,
+  .meter,
+  .toast,
+  .boost-tag,
+  .overlay,
+  .combo-badge {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .icon-btn,
+  .chip,
+  .hud-card,
+  .pill {
+    background: color-mix(in srgb, var(--surface-strong) 72%, transparent);
+  }
+}
+
+/* ==========================================================================
+ * Backdrop — aurora blobs + a grain film
+ * ========================================================================== */
+
+.aurora {
+  position: fixed;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+  /* No blur filter: the blobs are already soft radial gradients, and a 60px
+     blur over three huge animated elements is the single most expensive
+     thing on the page in WKWebView. */
+  opacity: 0.85;
+}
+
+.blob {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  mix-blend-mode: normal;
+}
+
+.blob-1 {
+  width: 58vmax;
+  height: 58vmax;
+  left: -12%;
+  top: -14%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 120, 190, 0.55), transparent 62%);
+  animation: drift-1 26s ease-in-out infinite alternate;
+}
+
+.blob-2 {
+  width: 52vmax;
+  height: 52vmax;
+  right: -14%;
+  top: 6%;
+  background: radial-gradient(circle at 60% 40%, rgba(124, 92, 255, 0.5), transparent 62%);
+  animation: drift-2 32s ease-in-out infinite alternate;
+}
+
+.blob-3 {
+  width: 64vmax;
+  height: 64vmax;
+  left: 6%;
+  bottom: -26%;
+  background: radial-gradient(circle at 45% 55%, rgba(86, 226, 210, 0.42), transparent 64%);
+  animation: drift-3 38s ease-in-out infinite alternate;
+}
+
+html[data-theme="dark"] .aurora,
+html[data-theme="system"] .aurora {
+  opacity: 0.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .aurora { opacity: 0.5; }
+}
+
+@keyframes drift-1 {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(6vw, 5vh, 0) scale(1.12); }
+}
+
+@keyframes drift-2 {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to { transform: translate3d(-7vw, 6vh, 0) scale(0.94); }
+}
+
+@keyframes drift-3 {
+  from { transform: translate3d(0, 0, 0) scale(0.96); }
+  to { transform: translate3d(5vw, -6vh, 0) scale(1.14); }
+}
+
+/* A very fine noise film keeps the big gradients from banding. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.5;
+  /* A pre-rendered PNG, not an SVG feTurbulence filter: rasterising the
+     filter cost ~130ms on the first paint. */
+  background-image: url("grain.png");
+  background-repeat: repeat;
+  background-size: 96px 96px;
+}
+
+/* A few stars twinkle in the backdrop. Six tiny elements animating opacity
+   and transform: the compositor's work, nothing for the main thread. */
+.twinkles {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.twinkle {
+  position: absolute;
+  font-size: 14px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 16px var(--theme-accent);
+  opacity: 0;
+  animation: twinkle 3.4s ease-in-out infinite;
+}
+
+.twinkle:nth-child(1) { left: 8%; top: 12%; animation-delay: 0.2s; }
+.twinkle:nth-child(2) { left: 88%; top: 9%; font-size: 11px; animation-delay: 1.4s; }
+.twinkle:nth-child(3) { left: 5%; top: 58%; font-size: 10px; animation-delay: 2.5s; }
+.twinkle:nth-child(4) { left: 92%; top: 46%; animation-delay: 0.9s; animation-duration: 4.1s; }
+.twinkle:nth-child(5) { left: 14%; top: 90%; font-size: 12px; animation-delay: 1.9s; }
+.twinkle:nth-child(6) { left: 84%; top: 84%; font-size: 16px; animation-delay: 3s; animation-duration: 3.9s; }
+
+html[data-theme="dark"] .twinkle,
+html[data-theme="system"] .twinkle { color: #fff8e1; }
+
+/* ==========================================================================
+ * Shell
+ * ========================================================================== */
+
+.app {
+  width: min(100%, 460px);
+  /* Without this a flex item refuses to shrink below its content width, so the
+     theme rail would push the whole app wider than the viewport. */
+  min-width: 0;
+  max-width: 100%;
+  /* Auto margins centre the whole app when there is room and collapse to
+     zero when the content is taller than the viewport — so the header can
+     never be pushed up behind the notch. */
+  flex: 0 1 auto;
+  min-height: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* -- top bar -------------------------------------------------------------- */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.brand-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: block;
+  box-shadow: 0 6px 16px -6px rgba(80, 30, 130, 0.6), 0 0 0 1px var(--border);
+}
+
+.brand-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  /* Must stay on one line: background-clip: text only paints the first line
+     box, so a wrapped part would render invisible. */
+  white-space: nowrap;
+  background: linear-gradient(120deg, var(--text) 20%, var(--theme-accent) 60%, var(--theme-accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-name em {
+  font-style: normal;
+  font-weight: 300;
+  /* A solid colour keeps the second word readable even if it ever wraps. */
+  color: var(--theme-accent-2);
+  -webkit-text-fill-color: currentColor;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 160ms var(--spring), filter 160ms var(--ease), background 200ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  padding: 0;
+}
+
+.icon-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.icon-btn:active { transform: scale(0.92); }
+
+/* -- HUD ------------------------------------------------------------------ */
+
+.hud {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 10px;
+}
+
+.hud-card {
+  position: relative;
+  padding: 12px 16px 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: var(--shadow-soft);
+  text-align: left;
+  overflow: hidden;
+}
+
+.hud-card::after {
+  /* specular sheen */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0) 46%);
+  pointer-events: none;
+}
+
+.hud-label {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+.hud-value {
+  display: block;
+  font-size: clamp(1.6rem, 7vmin, 2.1rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud-card-score .hud-value {
+  font-size: clamp(2rem, 9vmin, 2.8rem);
+  background: linear-gradient(120deg, var(--text), var(--theme-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hud-card-score.bump .hud-value { animation: bump 320ms var(--spring); }
+
+/* Combo ×3 and up: the score card catches fire. */
+.hud-card-score.on-fire {
+  border-color: color-mix(in srgb, var(--theme-accent) 60%, transparent);
+  box-shadow:
+    var(--shadow-soft),
+    0 0 0 1px color-mix(in srgb, var(--theme-accent) 35%, transparent),
+    0 0 28px -6px var(--theme-accent);
+  animation: fire-glow 900ms ease-in-out infinite alternate;
+}
+
+@keyframes fire-glow {
+  from { filter: saturate(1); }
+  to { filter: saturate(1.35) brightness(1.06); }
+}
+
+.hud-card-time .hud-value {
+  font-size: clamp(1.3rem, 5.5vmin, 1.7rem);
+  color: var(--muted);
+  letter-spacing: -0.02em;
+}
+
+/* The combo card floats above the HUD: it must not change the height of the
+   layout, or the whole app re-centres and the page shifts. */
+.hud-card-streak {
+  position: absolute;
+  right: 0;
+  top: -6px;
+  z-index: 4;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--theme-accent) 94%, transparent), color-mix(in srgb, var(--theme-accent-2) 94%, transparent));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--theme-accent) 85%, transparent);
+}
+
+.hud-card-streak[hidden] { display: none; }
+
+.hud-card-streak .hud-label { color: rgba(255, 255, 255, 0.85); font-size: 0.58rem; }
+.hud-card-streak .hud-value { color: #fff; font-size: 1.1rem; }
+.hud-card-streak.pop { animation: streak-in 420ms var(--spring); }
+
+/* The combo window, draining: merge again before it is empty. */
+.combo-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 0 3px 3px 0;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.combo-bar.run { animation: drain var(--window, 1400ms) linear forwards; }
+
+@keyframes drain {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* -- level card ------------------------------------------------------------ */
+
+/* Level: a thin strip under the HUD. The progress ring itself lives in the
+   top bar so the board can take the vertical space. */
+.level-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 4px;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
+
+.level-strip.pop { animation: level-pop 700ms var(--spring); }
+
+/* Only transform and opacity: animating the shadow would repaint it on
+   every frame. */
+@keyframes level-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.05); filter: brightness(1.25); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* The badge is a progress ring: --p is 0..1 towards the next level. */
+/* The level ring, small enough to live next to the wordmark. */
+.level-chip {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background:
+    radial-gradient(circle, var(--surface-strong) 58%, transparent 60%),
+    conic-gradient(var(--theme-accent) 0deg, var(--theme-accent-2) calc(var(--p) * 360deg), color-mix(in srgb, var(--text) 12%, transparent) calc(var(--p) * 360deg));
+  box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--theme-accent) 70%, transparent);
+  transition: background 420ms var(--ease);
+}
+
+.level-num {
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, var(--text), var(--theme-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.level-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.level-title {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.level-title b { color: var(--theme-accent); }
+
+.level-best,
+.level-next,
+.level-pct {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.level-best[hidden] { display: none; }
+.level-pct { font-variant-numeric: tabular-nums; }
+
+.level-track {
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  overflow: hidden;
+}
+
+.level-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 0 12px -2px var(--theme-accent);
+  transition: width 520ms var(--ease);
+}
+
+/* Level-up banner over the board. */
+.level-banner {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+  opacity: 0;
+  text-align: center;
+}
+
+.level-banner-kicker {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+
+.level-banner-num {
+  font-size: clamp(4rem, 28vmin, 7rem);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  color: #fff;
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--theme-accent) 60%, #000);
+  text-shadow:
+    0 6px 0 color-mix(in srgb, var(--theme-accent-2) 80%, #000),
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    0 0 40px var(--theme-accent);
+}
+
+.level-banner-name {
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--theme-accent) 80%, transparent);
+}
+
+.level-banner.go { animation: banner 1700ms var(--spring) forwards; }
+
+@keyframes banner {
+  0% { opacity: 0; transform: scale(2.2) rotate(-6deg); }
+  18% { opacity: 1; transform: scale(1) rotate(0); }
+  70% { opacity: 1; transform: scale(1.02) translateY(-4px); }
+  100% { opacity: 0; transform: scale(0.9) translateY(-40px); }
+}
+
+/* -- booster meter --------------------------------------------------------- */
+
+.meter {
+  position: relative;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  margin-top: -6px;
+}
+
+.meter-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--theme-accent-2), var(--theme-accent));
+  transition: width 420ms var(--ease);
+  box-shadow: 0 0 14px -2px var(--theme-accent);
+}
+
+/* The travelling sheen. It used to animate background-position, which
+   repaints the meter on the main thread on every frame for as long as the
+   meter has any charge — even when nobody touches the game. Now a wide,
+   repeating layer slides with a transform, which the compositor does alone.
+   The geometry is the same: one gradient tile is twice the fill wide and it
+   travels four fill-widths per cycle. .meter-sheen is the square clip the
+   old background had. */
+.meter-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.meter-sheen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -400%;
+  width: 500%;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.55) 50%, transparent 80%);
+  background-size: 40% 100%;
+  animation: sheen 2.2s linear infinite;
+}
+
+.meter.hot .meter-fill { animation: meter-throb 700ms ease-in-out infinite alternate; }
+
+.meter-text {
+  position: relative;
+  z-index: 1;
+  display: block;
+  line-height: 16px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* The fill stays translucent so the label on top of it stays readable. */
+.meter-fill {
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--theme-accent-2) 62%, transparent),
+    color-mix(in srgb, var(--theme-accent) 62%, transparent));
+}
+
+.meter.hot .meter-fill {
+  background: linear-gradient(90deg, var(--theme-accent-2), var(--theme-accent));
+}
+
+.meter.full { animation: meter-flash 700ms var(--spring); }
+
+@keyframes sheen {
+  from { transform: translateX(0); }
+  to { transform: translateX(80%); }
+}
+
+@keyframes meter-throb {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.3) saturate(1.3); }
+}
+
+@keyframes meter-flash {
+  0% { transform: scale(1); box-shadow: var(--shadow-soft); }
+  40% { transform: scale(1.04); box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-accent) 40%, transparent), 0 0 30px var(--theme-accent); }
+  100% { transform: scale(1); box-shadow: var(--shadow-soft); }
+}
+
+.score-add {
+  position: absolute;
+  right: 14px;
+  top: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--theme-accent);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.score-add.go { animation: float-up 800ms var(--ease) forwards; }
+
+/* ==========================================================================
+ * Board
+ * ========================================================================== */
+
+.board-wrap {
+  position: relative;
+  flex: 0 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board {
+  position: relative;
+  /* The board is a square that is as wide as the app allows. On a short
+     screen it shrinks so the rest of the UI still fits. */
+  width: min(100%, max(190px, calc(100dvh - 500px)));
+  aspect-ratio: 1 / 1;
+  padding: var(--gap);
+  border-radius: var(--radius-xl);
+  background: var(--board);
+  border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  box-shadow:
+    var(--shadow-lift),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 1px color-mix(in srgb, var(--theme-accent) 22%, transparent),
+    0 0 44px -12px color-mix(in srgb, var(--theme-accent) 55%, transparent);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: box-shadow 400ms var(--ease), background 400ms var(--ease), transform 220ms var(--spring);
+}
+
+.cells,
+.tiles,
+.fx {
+  position: absolute;
+  inset: var(--gap);
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap);
+}
+
+.cells div {
+  background: var(--cell);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 var(--cell-edge);
+}
+
+.fx {
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  z-index: 3;
+}
+
+/* -- tiles ---------------------------------------------------------------- */
+
+.tile {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc((100% - 3 * var(--gap)) / 4);
+  height: calc((100% - 3 * var(--gap)) / 4);
+  transform: translate(calc(var(--c) * (100% + var(--gap))), calc(var(--r) * (100% + var(--gap))));
+  transition: transform var(--slide) var(--ease);
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tile-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  background: linear-gradient(150deg, var(--tile-a) 0%, var(--tile-b) 100%);
+  color: var(--tile-fg);
+  box-shadow: var(--shadow-tile), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  overflow: hidden;
+}
+
+.tile-inner::before {
+  /* specular highlight */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 44%);
+  pointer-events: none;
+}
+
+.tile-inner::after {
+  /* inner shading for depth */
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 -4px 10px rgba(60, 20, 100, 0.16);
+  pointer-events: none;
+}
+
+.tile-glyph {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.7rem, 12vmin, 3rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  /* A text shadow instead of a filter: no extra layer per tile. */
+  text-shadow: 0 2px 3px rgba(40, 10, 70, 0.25);
+}
+
+/* Only tiles that appear animate in — reused tiles must not re-animate. */
+.tile.new .tile-glyph { animation: glyph-in 260ms var(--spring) both; }
+
+.tile.len-2 .tile-glyph { font-size: clamp(1.4rem, 9.5vmin, 2.4rem); }
+.tile.len-3 .tile-glyph { font-size: clamp(1.2rem, 8vmin, 2rem); }
+.tile.len-4 .tile-glyph { font-size: clamp(1rem, 6.5vmin, 1.6rem); }
+.tile.len-5 .tile-glyph { font-size: clamp(0.85rem, 5.5vmin, 1.3rem); }
+
+.tile.new .tile-inner { animation: spawn-pop 260ms var(--spring) both; }
+.tile.merged { z-index: 2; }
+.tile.merged .tile-inner { animation: merge-pop 420ms var(--spring); }
+.tile.merged .tile-glyph { animation: glyph-pop 420ms var(--spring); }
+
+/* Goal tile — the StateLess-Cube. */
+.tile.goal .tile-inner {
+  box-shadow:
+    var(--shadow-tile),
+    0 0 0 2px rgba(255, 255, 255, 0.65),
+    0 0 30px -2px var(--theme-accent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  animation: goal-pulse 2.4s ease-in-out infinite;
+}
+
+.tile.goal .tile-inner::before {
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 46%),
+    conic-gradient(from 0deg, rgba(255, 255, 255, 0.35), transparent 25%, rgba(255, 255, 255, 0.35) 50%, transparent 75%, rgba(255, 255, 255, 0.35));
+  background-size: 100% 100%, 220% 220%;
+  animation: shine 3.2s linear infinite;
+}
+
+/* Shine: a glint sweeps across every tile from 64 up, and the big ones
+ * (256+) twinkle. Transform and opacity only — the compositor runs it, the
+ * main thread never sees it. Each tile gets its own delay (--glint-delay) so
+ * the board shimmers instead of flashing in step. */
+.tile-shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.tile.shiny .tile-shine::before {
+  content: '';
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -70%;
+  width: 46%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.72) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(0) skewX(-16deg);
+  animation: glint 3.8s var(--ease) var(--glint-delay, 0s) infinite;
+}
+
+.tile.sparkly .tile-shine::after {
+  content: '✦';
+  position: absolute;
+  top: 7%;
+  right: 10%;
+  font-size: 15px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.95), 0 0 12px var(--tile-b);
+  opacity: 0;
+  animation: twinkle 2.2s ease-in-out var(--glint-delay, 0s) infinite;
+}
+
+@keyframes glint {
+  0% { transform: translateX(0) skewX(-16deg); }
+  32%, 100% { transform: translateX(420%) skewX(-16deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+  45% { transform: scale(1.15) rotate(70deg); opacity: 1; }
+  60% { transform: scale(0.9) rotate(90deg); opacity: 0.9; }
+}
+
+@keyframes glyph-in {
+  from { transform: scale(0.6) translateY(6px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes spawn-pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes merge-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.22); filter: brightness(1.35) saturate(1.2); }
+  60% { transform: scale(0.96); }
+  100% { transform: scale(1); filter: none; }
+}
+
+@keyframes glyph-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes goal-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.18) saturate(1.2); }
+}
+
+@keyframes shine {
+  to { background-position: 0 0, 220% 0; }
+}
+
+@keyframes bump {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@keyframes float-up {
+  0% { opacity: 0; transform: translateY(6px) scale(0.8); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-26px) scale(1.05); }
+}
+
+@keyframes streak-in {
+  0% { transform: scale(0.9); opacity: 0; }
+  60% { transform: scale(1.03); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* -- board feedback -------------------------------------------------------
+ *
+ * IMPORTANT: the board itself must never be transformed. It carries a
+ * backdrop-filter, and moving a blurred surface makes the compositor re-blur
+ * the whole backdrop on every frame of the animation — on a real phone that
+ * stalled the compositor for up to 700ms per move. The board content (the
+ * cells and the tiles) moves instead, which looks the same and costs
+ * nothing. Measured on an iPhone 15 Pro Max: 27 slow frames and a 722ms
+ * worst frame before, 1 slow frame and 48ms after.
+ * ------------------------------------------------------------------------ */
+
+.board {
+  overflow: hidden; /* the content shakes, it must not leave the board */
+}
+
+.board.shake .tiles,
+.board.shake .cells { animation: shake 320ms var(--ease); }
+
+/* A jolt after a big explosion. */
+.board.quake .tiles,
+.board.quake .cells { animation: quake 420ms var(--ease); }
+
+@keyframes quake {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  15% { transform: translate(-5px, 4px) scale(1.012); }
+  30% { transform: translate(6px, -3px) scale(1.01); }
+  45% { transform: translate(-4px, -4px); }
+  60% { transform: translate(3px, 3px); }
+  80% { transform: translate(-1px, 1px); }
+}
+
+/* The board leans into the move. This one stays on the board: the tilt is a
+   single, short 3D transform of the whole surface, and moving the *content*
+   instead would put a 3D-transformed layer over the 16 tiles, which is
+   measurably more expensive (measured: 103ms worst frame vs 48ms). */
+.board.tilt-left { transform: perspective(900px) rotateY(-5deg); }
+.board.tilt-right { transform: perspective(900px) rotateY(5deg); }
+.board.tilt-up { transform: perspective(900px) rotateX(5deg); }
+.board.tilt-down { transform: perspective(900px) rotateX(-5deg); }
+
+
+/* New highest tile: the whole board glows up.
+ *
+ * The glow is a separate layer whose OPACITY is animated. Animating the
+ * box-shadow itself would re-rasterise an 80px blur on every frame — on an
+ * iPhone that was a 1094ms stall the moment a level was reached. */
+.board::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--theme-accent) 70%, transparent),
+    0 0 80px -6px var(--theme-accent);
+}
+
+.board.levelup::after { animation: levelup 900ms var(--ease); }
+
+@keyframes levelup {
+  0% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ×2 booster active: a golden ring around the board. */
+.board.boosted {
+  box-shadow:
+    var(--shadow-lift),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 3px rgba(255, 214, 102, 0.75),
+    0 0 50px -8px #ffd166;
+}
+
+/* Hammer armed: tiles become targets. */
+.board.targeting { cursor: crosshair; }
+.board.targeting .tiles { cursor: pointer; }
+.board.targeting .tile-inner { animation: target-wobble 600ms ease-in-out infinite alternate; }
+.board.targeting .tile:hover .tile-inner {
+  filter: brightness(1.15) saturate(1.2);
+  box-shadow: var(--shadow-tile), 0 0 0 3px #fff, 0 0 24px var(--theme-accent);
+}
+
+@keyframes target-wobble {
+  from { transform: rotate(-1.5deg) scale(0.98); }
+  to { transform: rotate(1.5deg) scale(1.02); }
+}
+
+.tile.smashed .tile-inner { animation: smashed 260ms var(--ease) forwards; }
+
+@keyframes smashed {
+  0% { transform: scale(1); opacity: 1; filter: brightness(1.6); }
+  100% { transform: scale(1.5) rotate(8deg); opacity: 0; filter: brightness(2); }
+}
+
+/* Shuffle: tiles spin out, the new layout spins in. */
+.board.shuffling .tile-inner { animation: shuffle-spin 360ms var(--ease) forwards; }
+
+@keyframes shuffle-spin {
+  0% { transform: rotate(0) scale(1); opacity: 1; }
+  100% { transform: rotate(180deg) scale(0.2); opacity: 0; }
+}
+
+/* -- effects canvases -----------------------------------------------------
+ *
+ * Every particle (sparks, glints, debris, shockwaves, ripples, the emoji
+ * rain) is drawn on one canvas by src/fx.js, and the confetti on another by
+ * canvas-confetti. Two layers, however many particles: the DOM version gave
+ * each particle its own element and compositor layer — 40+ during a combo. */
+
+.fx-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Screen flash on big merges, boosters and new bests. */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: screen;
+  /* Brightest at the edges so the board stays readable mid-flash. */
+  -webkit-mask-image: radial-gradient(ellipse at center, transparent 30%, #000 100%);
+  mask-image: radial-gradient(ellipse at center, transparent 30%, #000 100%);
+}
+
+.flash.go { animation: flash 460ms ease-out forwards; }
+.flash.go.strong { animation-duration: 700ms; }
+
+@keyframes flash {
+  0% { opacity: 0.38; }
+  100% { opacity: 0; }
+}
+
+/* -- board tags ----------------------------------------------------------- */
+
+.boost-tag,
+.target-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  color: #3a2a00;
+  background: linear-gradient(120deg, #ffe08a, #ffc23c);
+  box-shadow: 0 10px 22px -10px rgba(255, 170, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.6);
+  animation: card-in 360ms var(--spring) both;
+}
+
+.boost-tag[hidden],
+.target-hint[hidden] { display: none; }
+
+.target-hint {
+  color: #fff;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 10px 22px -10px color-mix(in srgb, var(--theme-accent) 80%, transparent);
+}
+
+.link-btn {
+  font: inherit;
+  font-weight: 800;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* -- toasts --------------------------------------------------------------- */
+
+.toasts {
+  position: fixed;
+  left: 50%;
+  top: calc(12px + env(safe-area-inset-top));
+  transform: translateX(-50%);
+  z-index: 25;
+  /* Absolute children: the stack is placed by JS, so a toast leaving never
+     moves the others (that would be a layout shift). */
+  position: fixed;
+  width: min(92vw, 420px);
+  pointer-events: none;
+  width: min(92vw, 420px);
+}
+
+.toast {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--shadow-lift);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: -0.01em;
+  max-width: 100%;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(-14px) scale(0.92);
+  transition: opacity 260ms var(--ease), transform 380ms var(--spring);
+}
+
+.toast.in { opacity: 1; transform: translateY(0) scale(1); }
+.toast.out { opacity: 0; transform: translateY(-10px) scale(0.96); }
+
+.toast-milestone,
+.toast-best {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+}
+
+.toast-booster {
+  color: #3a2a00;
+  border-color: transparent;
+  background: linear-gradient(120deg, #ffe08a, #ffc23c);
+}
+
+.toast-unlock {
+  border-color: color-mix(in srgb, var(--theme-accent) 50%, transparent);
+}
+
+.toast-level {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--theme-accent-2), var(--theme-accent));
+  font-size: 0.95rem;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-0.6deg); }
+  40% { transform: translateX(5px) rotate(0.5deg); }
+  60% { transform: translateX(-3px) rotate(-0.3deg); }
+  80% { transform: translateX(2px); }
+}
+
+.combo-badge {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--theme-accent) 80%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.combo-badge.go { animation: combo-pop 1100ms var(--spring) forwards; }
+
+@keyframes combo-pop {
+  0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.6); }
+  20% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.1); }
+  70% { opacity: 1; transform: translateX(-50%) translateY(-4px) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-18px) scale(0.9); }
+}
+
+/* ==========================================================================
+ * Dock + theme rail
+ * ========================================================================== */
+
+/* One row: the boosters on the left, the game actions on the right. */
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.icon-btn-sm {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 12px;
+  font-size: 1rem;
+}
+
+.action-buttons .pill {
+  padding: 10px 16px;
+  min-height: 40px;
+  font-size: 0.9rem;
+}
+
+.pill {
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border-radius: var(--radius-pill);
+  padding: 12px 20px;
+  min-height: 46px;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 160ms var(--spring), filter 160ms var(--ease), opacity 160ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.pill:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
+.pill:active:not(:disabled) { transform: scale(0.95); }
+.pill:disabled { opacity: 0.42; cursor: default; }
+
+.pill-primary {
+  color: #fff;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  border-color: transparent;
+  box-shadow: 0 14px 28px -12px color-mix(in srgb, var(--theme-accent) 85%, transparent);
+}
+
+.pill:focus-visible,
+.chip:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--theme-accent);
+  outline-offset: 2px;
+}
+
+/* The board is the play area: a softer ring, it must not dominate the view. */
+.board:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--shadow-lift),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 2px color-mix(in srgb, var(--theme-accent) 28%, transparent),
+    0 0 44px -12px color-mix(in srgb, var(--theme-accent) 55%, transparent);
+}
+
+.pill-icon {
+  width: 46px;
+  padding: 0;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* -- boosters ------------------------------------------------------------- */
+
+.boosters {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.booster {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  min-height: 40px;
+  min-width: 48px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 160ms var(--spring), filter 160ms var(--ease), opacity 160ms var(--ease), box-shadow 200ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.booster:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.05); }
+.booster:active:not(:disabled) { transform: scale(0.95); }
+.booster:disabled { opacity: 0.45; cursor: default; }
+.booster:disabled .booster-glyph { filter: grayscale(1); }
+
+.booster.has:not(:disabled) {
+  border-color: color-mix(in srgb, var(--theme-accent) 45%, transparent);
+  box-shadow: var(--shadow-soft), 0 0 18px -6px var(--theme-accent);
+}
+
+.booster.armed {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  animation: armed 700ms ease-in-out infinite alternate;
+}
+
+.booster.earned { animation: earned 700ms var(--spring); }
+
+.booster-glyph { font-size: 1.05rem; line-height: 1; }
+.booster-name { letter-spacing: -0.01em; }
+
+.booster-count {
+  position: absolute;
+  top: -8px;
+  right: -7px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--theme-accent) 80%, transparent), 0 0 0 2px var(--bg);
+  transition: transform 200ms var(--spring);
+}
+
+.booster:disabled .booster-count { background: var(--muted); }
+.booster.earned .booster-count { transform: scale(1.35); }
+
+@keyframes armed {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--theme-accent) 60%, transparent); }
+  to { box-shadow: 0 0 0 8px color-mix(in srgb, var(--theme-accent) 0%, transparent); }
+}
+
+@keyframes earned {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12) rotate(-3deg); filter: brightness(1.3); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@media (max-width: 380px) {
+  .booster-name { display: none; }
+}
+
+.themes {
+  margin-top: -2px;
+}
+
+.rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 8px;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  min-width: 0;
+  max-width: 100%;
+  /* Fade the edges so the rail reads as scrollable. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+}
+
+.rail::-webkit-scrollbar { display: none; }
+
+.chip {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow-soft);
+  transition: transform 180ms var(--spring), box-shadow 180ms var(--ease), border-color 180ms var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.chip:hover { transform: translateY(-2px); }
+.chip:active { transform: scale(0.96); }
+
+.chip.active {
+  border-color: transparent;
+  color: #fff;
+  gap: 8px;
+  padding: 3px 14px 3px 3px;
+  background: linear-gradient(120deg, var(--theme-accent), var(--theme-accent-2));
+  box-shadow: 0 14px 26px -12px color-mix(in srgb, var(--theme-accent) 85%, transparent);
+}
+
+.chip.active .chip-label { color: #fff; display: inline; }
+
+.chip-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 4px 10px -4px rgba(50, 20, 90, 0.6);
+}
+
+.chip-glyph {
+  font-size: 0.95rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(40, 10, 70, 0.3));
+}
+
+.chip-label { color: var(--text); display: none; }
+
+/* ==========================================================================
+ * Overlay
+ * ========================================================================== */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  animation: fade-in 320ms var(--ease) both;
+}
+
+.overlay[hidden] { display: none; }
+
+.overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 22px 26px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lift);
+  text-align: center;
+  animation: card-in 460ms var(--spring) both;
+  max-width: 100%;
+}
+
+.overlay-emoji {
+  font-size: 3rem;
+  line-height: 1;
+  filter: drop-shadow(0 8px 14px rgba(60, 20, 100, 0.35));
+  animation: bob 2.4s ease-in-out infinite;
+}
+
+.overlay-title {
+  font-size: clamp(1.25rem, 6vmin, 1.7rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.overlay-sub {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+@keyframes card-in {
+  from { transform: scale(0.86) translateY(14px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-7px) rotate(2deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ==========================================================================
+ * Text bits
+ * ========================================================================== */
+
+.instructions {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+
+.instructions-more { display: none; }
+
+.instructions.expanded .instructions-more { display: inline; }
+
+.instructions.expanded .instructions-short { display: none; }
+
+kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  margin: 0 1px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--stroke);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.footer {
+  position: relative;
+  z-index: 2;
+  margin-top: 18px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.footer a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 150ms var(--ease);
+}
+
+.footer a:hover { color: var(--theme-accent); }
+
+/* Screenshot mode: hide everything that is not the game. */
+html.clean .footer,
+html.clean .instructions { display: none; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+ * Motion preferences
+ * ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .pill,
+  .chip,
+  .icon-btn,
+  .blob,
+  .aurora,
+  .twinkle,
+  .tile-shine::before,
+  .tile-shine::after {
+    transition: none;
+    animation: none !important;
+  }
+
+  .tile-inner,
+  .tile-glyph,
+  .hud-value,
+  .score-add,
+  .overlay,
+  .overlay-card,
+  .combo-badge,
+  .board,
+  .meter,
+  .meter-fill,
+  .booster,
+  .boost-tag,
+  .target-hint,
+  .hud-card-score,
+  .level-strip,
+  .level-chip,
+  .level-num,
+  .level-banner {
+    animation-duration: 1ms !important;
+  }
+
+  .level-fill,
+  .level-chip { transition: none; }
+
+  .toast { transition-duration: 1ms; }
+
+  /* fx.js and canvas-confetti check the preference themselves; the
+     canvases go too, to be sure. */
+  .fx-canvas,
+  .confetti-canvas,
+  .twinkles,
+  .flash {
+    display: none;
+  }
+}
+
+
+/* ==========================================================================
+ * Diagnostics variants
+ *
+ * The build can set a variant (www/diag-config.js) to switch one effect off
+ * and measure what it costs on a real device.
+ * ========================================================================== */
+
+html.variant-no-glass .board,
+html.variant-no-glass .hud-card,
+html.variant-no-glass .chip,
+html.variant-no-glass .pill,
+html.variant-no-glass .icon-btn,
+html.variant-no-glass .meter,
+html.variant-no-glass .toast,
+html.variant-no-glass .overlay {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html.variant-no-aurora .aurora { display: none !important; }
+html.variant-no-grain .grain { display: none !important; }
+html.variant-no-shadow .tile-glyph { text-shadow: none !important; }
+html.variant-no-effects .tile-inner,
+html.variant-no-effects .tile-glyph,
+html.variant-no-effects .tile-shine::before,
+html.variant-no-effects .tile-shine::after { animation: none !important; }
+html.variant-no-effects .fx-canvas,
+html.variant-no-effects .twinkles { display: none !important; }
+
+/* Shake the content, not the glass: moving the board forces the compositor to
+   re-blur its backdrop on every frame of the animation. */
+html.variant-shake-content .board { overflow: hidden; }
+html.variant-shake-content .board.shake { animation: none; }
+html.variant-shake-content .board.shake .tiles,
+html.variant-shake-content .board.shake .cells { animation: shake 320ms var(--ease); }
+
+html.variant-no-confetti .confetti-canvas { display: none !important; }
+
+html.variant-no-tilt .board.tilt-left,
+html.variant-no-tilt .board.tilt-right,
+html.variant-no-tilt .board.tilt-up,
+html.variant-no-tilt .board.tilt-down { transform: none !important; }
+
+html.variant-no-clip .board { overflow: visible !important; }
+
+/* ==========================================================================
+ * Demo build (npm run build:demo): the tag beside the brand and the end.
+ * Unused in the full game.
+ * ========================================================================== */
+
+/* The tag sits under the brand name: beside it, the top bar overflows a phone. */
+.demo-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.demo-tag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--theme-accent);
+  color: #fff;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+/* The demo is over: the loops that keep running on an idle board stop. The
+   end card (inside .board-wrap's overlay) keeps its own entrance. */
+html.demo-over :is(.aurora, .twinkles, .hud, .meter, .tiles) * {
+  animation-play-state: paused !important;
+}
