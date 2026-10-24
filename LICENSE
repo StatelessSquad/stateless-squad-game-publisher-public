@@ -1,21 +1,36 @@
-MIT License
+StateLess Squad Proprietary License
 
-Copyright (c) 2026 StatelessSquad
+Copyright (c) 2026 StateLess Squad (https://github.com/StatelessSquad).
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+1. Ownership. This repository and everything in it (source code, builds,
+   game designs, levels, art, audio, text, screenshots, videos and
+   documentation, together "the Software") is the proprietary property of
+   StateLess Squad.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+2. No license. No right or license is granted to use, copy, modify, merge,
+   publish, distribute, sublicense, sell, rent, host or create derivative
+   works of the Software, in whole or in part, without the prior written
+   permission of StateLess Squad. Where this repository is public on GitHub,
+   viewing it there grants only the rights GitHub's Terms of Service require.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+3. Playing the games. Playing a StateLess Squad game through its official
+   pages, the App Store or Google Play is governed by that game's terms of
+   use, not by this file.
+
+4. Third-party software. The Software uses open-source components (for
+   example three.js, PixiJS, Phaser and Capacitor) and fonts that remain
+   under their own licenses (such as MIT, Apache-2.0 and OFL-1.1). Those
+   licenses apply to those components only, and nothing in this file limits
+   the rights they grant.
+
+5. Earlier versions. Any copy of this repository that was published under
+   the MIT License before this license was added stays under the MIT
+   License. This license applies to everything published after it.
+
+6. No warranty. The Software is provided "as is", without warranty of any
+   kind, express or implied. In no event shall StateLess Squad be liable for
+   any claim, damages or other liability arising from the Software or its
+   use, as far as the law allows.
+
+For licensing and partnership inquiries: https://github.com/StatelessSquad
