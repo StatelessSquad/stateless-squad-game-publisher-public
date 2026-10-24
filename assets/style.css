@@ -2096,3 +2096,113 @@ a.tile-in:active {
     transition: none;
   }
 }
+
+
+/* -- the preview notice ------------------------------------------------------------ */
+
+.notice-bar {
+  background: var(--pop);
+  color: #15111f;
+  border-bottom: var(--b) solid #15111f;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.notice-in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  padding-block: 9px;
+}
+
+.notice-bar a {
+  color: inherit;
+  font-weight: 800;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+
+.notice-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border: var(--b) solid #15111f;
+  border-radius: 999px;
+  background: #15111f;
+  color: var(--pop);
+  font-family: var(--display);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.foot-note {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 78ch;
+  font-size: 0.85rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.foot-note a {
+  color: inherit;
+  font-weight: 700;
+}
+
+.notice-page {
+  padding-block: clamp(40px, 8vw, 88px);
+}
+
+.notice-wrap {
+  max-width: 760px;
+  display: grid;
+  gap: 22px;
+}
+
+.notice-wrap h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.notice-wrap h2 {
+  margin: 0 0 6px;
+  font-family: var(--display);
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.notice-wrap p {
+  margin: 0;
+}
+
+.notice-lede {
+  font-size: 1.15rem;
+  color: var(--muted);
+}
+
+.notice-page .notice-tag {
+  justify-self: start;
+  background: var(--pop);
+  color: #15111f;
+}
+
+.notice-page .fine {
+  margin-top: 8px;
+}
+
+@media (max-width: 560px) {
+  .notice-bar {
+    font-size: 0.8rem;
+  }
+
+  .notice-in {
+    gap: 4px 8px;
+    padding-block: 7px;
+  }
+}
