@@ -1,8 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
-    <loc>https://statelesssquad.github.io/stateless-squad-game-publisher-public/</loc>
+    <loc>https://www.statelesssquad.com/</loc>
     <lastmod>2026-10-24</lastmod>
-    <image:image><image:loc>https://statelesssquad.github.io/stateless-squad-game-publisher-public/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/assets/og.png</image:loc></image:image>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/slingstar/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/ember.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/aurora.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/abyss.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/fever.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/hangar.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/slingstar/assets/shots/day.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/slingstar/assets/shots/hero.webp</video:thumbnail_loc><video:title>Slingstar gameplay</video:title><video:description>Tap. Sling. Shine.</video:description><video:content_loc>https://www.statelesssquad.com/slingstar/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/slingstar/privacy/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/slingstar/support/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/slingstar/terms/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/snike/</loc>
+    <lastmod>2026-10-23</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/worm.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/legs.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/lizard.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/egg.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/dark.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/snike/assets/shots/day.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/snike/assets/shots/hero.webp</video:thumbnail_loc><video:title>Snike gameplay</video:title><video:description>Eat the light. Grow legs. Bite the dark.</video:description><video:content_loc>https://www.statelesssquad.com/snike/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/snike/privacy/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/snike/support/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/snike/terms/</loc>
+    <lastmod>2026-10-23</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/promptstorm/</loc>
+    <lastmod>2026-10-22</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/storm.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/refactor.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/hackathon.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/demoday.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/promptstorm/assets/shots/cloud.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/promptstorm/assets/shots/hero.webp</video:thumbnail_loc><video:title>Promptstorm gameplay</video:title><video:description>Vibe code. Dodge the hype.</video:description><video:content_loc>https://www.statelesssquad.com/promptstorm/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/promptstorm/privacy/</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/promptstorm/support/</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/promptstorm/terms/</loc>
+    <lastmod>2026-10-22</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/aurolith/</loc>
+    <lastmod>2026-10-24</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/aurora.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/orbit.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/nebula.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/play.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/aurolith/assets/shots/rush.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/aurolith/assets/shots/hero.webp</video:thumbnail_loc><video:title>Aurolith gameplay</video:title><video:description>Slice light. Climb to stars.</video:description><video:content_loc>https://www.statelesssquad.com/aurolith/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/aurolith/privacy/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/aurolith/support/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/aurolith/terms/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/word-garden/</loc>
+    <lastmod>2026-10-21</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/garden.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/listen.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/match.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/spell.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/night.webp</image:loc></image:image>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/word-garden/privacy/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/word-garden/support/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/word-garden/terms/</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stateless-cube/</loc>
+    <lastmod>2026-10-20</lastmod>
   </url>
 </urlset>

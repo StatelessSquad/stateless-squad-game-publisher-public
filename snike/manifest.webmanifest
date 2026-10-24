@@ -1,0 +1,16 @@
+{
+  "name": "Snike",
+  "short_name": "Snike",
+  "description": "A worm in the dark eats light and, meal by meal, sheds its skin into a lizard. Steer anywhere, chain combos, dash through the shades. No ads, no accounts, plays offline.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a0820",
+  "theme_color": "#7c5cff",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

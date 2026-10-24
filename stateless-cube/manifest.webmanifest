@@ -1,0 +1,15 @@
+{
+  "name": "StateLess-Cube",
+  "short_name": "StateLess-Cube",
+  "description": "A high pace merge tile game: nine themes, combos, boosters and 1000 levels.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#08060f",
+  "theme_color": "#08060f",
+  "icons": [
+    { "src": "assets/icon.png", "sizes": "256x256", "type": "image/png" },
+    { "src": "assets/favicon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

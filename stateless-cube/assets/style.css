@@ -1,0 +1,495 @@
+/* StateLess-Cube — product page.
+ *
+ * One stylesheet, no build step. Same lessons as the game apply here:
+ * no blur filters on big surfaces, no animated shadows, and motion on the
+ * compositor only (transform / opacity).
+ */
+
+:root {
+  --bg: #08060f;
+  --bg-2: #150e2e;
+  --surface: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.11);
+  --text: #f6f2ff;
+  --muted: #a99ccd;
+
+  --pink: #ff3fa4;
+  --violet: #7c5cff;
+  --cyan: #31d8ff;
+  --grad: linear-gradient(110deg, var(--pink), var(--violet) 52%, var(--cyan));
+
+  --radius: 28px;
+  --radius-pill: 999px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --max: 1160px;
+  --pad: clamp(20px, 5vw, 40px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; overflow-x: clip; }
+
+body {
+  font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont,
+               "Segoe UI", Inter, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img, video, svg { display: block; max-width: 100%; }
+img { height: auto; }
+
+a { color: inherit; text-decoration: none; }
+
+/* -- ambient backdrop (gradients only, no blur filters) ------------------ */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(52vw 52vw at 10% 2%, rgba(255, 63, 164, 0.30), transparent 62%),
+    radial-gradient(48vw 48vw at 92% 14%, rgba(124, 92, 255, 0.34), transparent 64%),
+    radial-gradient(56vw 56vw at 50% 98%, rgba(49, 216, 255, 0.18), transparent 66%),
+    linear-gradient(180deg, var(--bg), var(--bg-2) 55%, var(--bg));
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.3;
+  background-image: url("grain.png");
+  background-size: 180px;
+}
+
+.wrap {
+  width: min(100% - (var(--pad) * 2), var(--max));
+  margin-inline: auto;
+}
+
+/* -- nav ----------------------------------------------------------------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(8, 6, 15, 0.7);
+  backdrop-filter: saturate(150%) blur(14px);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 68px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.logo img { border-radius: 10px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 20px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.btn:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.1); }
+
+/* -- store buttons ------------------------------------------------------- */
+
+.stores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.store {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 22px 12px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  line-height: 1.15;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.store:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.11); }
+
+.store small {
+  display: block;
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+
+.mark { width: 22px; height: 22px; flex: none; }
+.mark-apple { margin-top: -2px; }
+
+/* -- hero ---------------------------------------------------------------- */
+
+/* clip, not hidden: the decorative art may bleed, but never scroll */
+.hero { padding: clamp(36px, 6vw, 74px) 0 clamp(20px, 3vw, 40px); overflow-x: clip; }
+
+.hero .wrap {
+  display: grid;
+  grid-template-columns: 1fr minmax(280px, 0.86fr);
+  align-items: center;
+  gap: clamp(28px, 5vw, 70px);
+}
+
+.hero-copy { min-width: 0; }
+
+h1 {
+  font-size: clamp(2.6rem, 7.4vw, 6rem);
+  font-weight: 800;
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+}
+
+.grad {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.lede {
+  margin-top: 18px;
+  font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.hero .stores { margin-top: clamp(26px, 4vw, 38px); }
+
+/* the phone, with two worlds peeking out behind it */
+
+.hero-media {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.phone {
+  position: relative;
+  width: clamp(230px, 27vw, 310px);
+  aspect-ratio: 560 / 1218;
+  border-radius: 44px;
+  padding: 9px;
+  background: linear-gradient(160deg, #3b3160, #16122a 45%, #2a2347);
+  box-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.16) inset,
+    0 40px 90px rgba(8, 4, 24, 0.7),
+    0 0 90px rgba(124, 92, 255, 0.35);
+  animation: float 7s ease-in-out infinite;
+}
+
+.phone video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 36px;
+  background: #ece8f5;
+}
+
+.notch {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 31%;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: #0a0714;
+  z-index: 2;
+}
+
+.video-play {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--grad);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* a class selector would otherwise beat the browser's [hidden] rule */
+.video-play[hidden] { display: none; }
+
+.peek {
+  position: absolute;
+  top: 50%;
+  width: clamp(130px, 17vw, 200px);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.peek-l { left: 0;  transform: translateY(-54%) rotate(-11deg); }
+.peek-r { right: 0; transform: translateY(-46%) rotate(11deg); }
+
+@keyframes float {
+  50% { transform: translateY(-14px); }
+}
+
+/* -- the rules, in three words ------------------------------------------- */
+
+.rules { padding: clamp(24px, 4vw, 44px) 0; }
+
+.rules .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(14px, 4vw, 44px);
+}
+
+.rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 26px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 700;
+}
+
+.rule span { font-size: 1.4em; line-height: 1; }
+
+/* -- feature blocks ------------------------------------------------------ */
+
+.feature { padding: clamp(44px, 6vw, 84px) 0; }
+
+.feature .wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(30px, 6vw, 80px);
+}
+
+.feature-flip .feature-copy { order: 2; }
+
+h2 {
+  font-size: clamp(2rem, 5.4vw, 3.9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.feature-copy p {
+  margin-top: 16px;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.feature-art { display: flex; justify-content: center; min-width: 0; }
+
+.single img,
+.fan img {
+  border-radius: 26px;
+  border: 1px solid var(--border);
+  box-shadow: 0 30px 70px rgba(8, 4, 24, 0.6);
+}
+
+.single img { width: clamp(210px, 25vw, 290px); }
+
+.fan {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+}
+
+/* the overlap is margin, not transform, so the row really is this narrow */
+.fan img { width: clamp(132px, 15.5vw, 195px); }
+
+.fan img:first-child  { transform: rotate(-9deg); margin-right: clamp(-54px, -4.2vw, -30px); z-index: 1; }
+.fan img:nth-child(2) { position: relative; z-index: 3; }
+.fan img:last-child   { transform: rotate(9deg);  margin-left: clamp(-54px, -4.2vw, -30px);  z-index: 2; }
+
+/* -- the worlds shelf ---------------------------------------------------- */
+
+.worlds { padding: clamp(20px, 4vw, 40px) 0 clamp(50px, 8vw, 90px); }
+
+.worlds .wrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.world {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 10px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.world:hover { transform: translateY(-4px); background: rgba(255, 255, 255, 0.1); }
+
+.dot {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  font-size: 1.3rem;
+  color: #130d24;
+  box-shadow: 0 8px 20px rgba(8, 4, 24, 0.45);
+}
+
+@media (min-width: 1000px) {
+  .worlds .wrap { grid-template-columns: repeat(9, 1fr); }
+}
+
+/* -- get it -------------------------------------------------------------- */
+
+.get { padding: 0 0 clamp(60px, 9vw, 110px); }
+
+.get .wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: clamp(42px, 7vw, 76px) var(--pad);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(70% 120% at 50% 0%, rgba(124, 92, 255, 0.3), transparent 70%),
+    var(--surface);
+  text-align: center;
+}
+
+.get img { border-radius: 22px; box-shadow: 0 20px 50px rgba(8, 4, 24, 0.6); }
+
+.get .stores { justify-content: center; }
+
+/* -- footer -------------------------------------------------------------- */
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 26px 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+footer .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+footer a { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+footer a:hover { color: var(--text); }
+footer .mark { width: 18px; height: 18px; }
+
+/* -- reveal on scroll (only hidden when JS can bring it back) ------------ */
+
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.js .reveal.in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+
+/* -- narrow screens ------------------------------------------------------ */
+
+@media (max-width: 900px) {
+  .hero .wrap,
+  .feature .wrap {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .hero .stores,
+  .rules .wrap { justify-content: center; }
+
+  .hero-copy { display: flex; flex-direction: column; align-items: center; }
+
+  .hero-media { margin-top: 10px; }
+
+  .feature-flip .feature-copy { order: 0; }
+
+  .phone { width: clamp(240px, 62vw, 300px); }
+
+  .peek { width: clamp(120px, 30vw, 170px); }
+  .peek-l { left: 0; }
+  .peek-r { right: 0; }
+
+  .single img { width: clamp(200px, 58vw, 280px); }
+  .fan img { width: 30vw; max-width: 180px; }
+  .fan img:first-child { margin-right: -6vw; }
+  .fan img:last-child  { margin-left: -6vw; }
+
+  footer .wrap { flex-direction: column; }
+}
+
+@media (max-width: 420px) {
+  .peek { display: none; }
+
+  /* three rules, one row */
+  .rules .wrap { gap: 9px; }
+  .rule { padding: 12px 15px; gap: 7px; font-size: 0.95rem; }
+  .rule span { font-size: 1.2em; }
+
+  .store { flex: 1 1 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .phone { animation: none; }
+  * { transition-duration: 0.01ms !important; }
+}

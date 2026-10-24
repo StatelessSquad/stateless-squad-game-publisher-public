@@ -1,0 +1,16 @@
+{
+  "name": "Word Garden",
+  "short_name": "Word Garden",
+  "description": "English words for children aged 3 to 7. Hear a word and find its picture, match it, spell it, and watch a garden grow with every word learned. No ads, no accounts, plays offline.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3fbff",
+  "theme_color": "#ffb330",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

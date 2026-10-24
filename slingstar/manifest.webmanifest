@@ -1,0 +1,16 @@
+{
+  "name": "Slingstar",
+  "short_name": "Slingstar",
+  "description": "Slingstar is a one-tap space game. Sling a comet from planet to planet through six glowing galaxies, chain perfect catches into combo fever, and spend your stardust on trails, halos and cores. Calm music, no ads, no accounts, plays offline.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07081a",
+  "theme_color": "#ff4f9a",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
