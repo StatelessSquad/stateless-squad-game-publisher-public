@@ -223,6 +223,12 @@ ol {
   white-space: nowrap;
 }
 
+/* The mascot: its own rounded tile, with a hairline so it holds on light and dark. */
+.brand img {
+  border-radius: 22%;
+  box-shadow: 0 0 0 1.5px color-mix(in srgb, currentColor 22%, transparent);
+}
+
 .nav nav {
   display: flex;
   align-items: center;
