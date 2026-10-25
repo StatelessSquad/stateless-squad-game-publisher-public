@@ -109,14 +109,15 @@
   </url>
 <url>
     <loc>https://www.statelesssquad.com/word-garden/</loc>
-    <lastmod>2026-10-24</lastmod>
+    <lastmod>2026-10-25</lastmod>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/og.png</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/hero.webp</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/garden.webp</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/listen.webp</image:loc></image:image>
-    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/match.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/read.webp</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/spell.webp</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/word-garden/assets/shots/night.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/word-garden/assets/shots/hero.webp</video:thumbnail_loc><video:title>Word Garden gameplay</video:title><video:description>Hear it. Find it. Grow it.</video:description><video:content_loc>https://www.statelesssquad.com/word-garden/assets/demo.mp4</video:content_loc></video:video>
   </url>
 <url>
     <loc>https://www.statelesssquad.com/word-garden/privacy/</loc>
