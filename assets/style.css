@@ -1980,6 +1980,179 @@ a.tile-in:active {
   font-size: 0.8rem;
 }
 
+/* -- beta: coming soon --------------------------------------------------------------- */
+
+/* The tiles that finish the last row (soonTiles in build.mjs): each one shows
+ * only in the layouts its classes name. The cube is CSS 3D, transform only. */
+.soon {
+  display: none;
+  flex-direction: column;
+  background: #0b0816;
+  color: #f6f2ff;
+  border: var(--b) dashed rgba(246, 242, 255, 0.42);
+  border-radius: 26px;
+  box-shadow: 6px 6px 0 rgba(124, 92, 255, 0.5);
+  overflow: hidden;
+}
+
+@media (min-width: 1001px) {
+  .soon.soon-3 {
+    display: flex;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1000px) {
+  .soon.soon-2 {
+    display: flex;
+  }
+}
+
+@media (max-width: 600px) {
+  .soon.soon-1 {
+    display: flex;
+    flex: 0 0 82%;
+    scroll-snap-align: center;
+  }
+}
+
+.soon-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  border-bottom: var(--b) dashed rgba(246, 242, 255, 0.28);
+  background:
+    radial-gradient(circle at 50% 44%, rgba(124, 92, 255, 0.34), transparent 58%),
+    linear-gradient(rgba(49, 216, 255, 0.07) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, rgba(49, 216, 255, 0.07) 1px, transparent 1px) 0 0 / 28px 28px,
+    #120c24;
+  perspective: 720px;
+}
+
+.cube-float {
+  animation: cube-float 3.2s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.cube {
+  --s: 112px;
+  position: relative;
+  width: var(--s);
+  height: var(--s);
+  transform-style: preserve-3d;
+  transform: rotateX(-24deg) rotateY(-35deg);
+  animation: cube-spin 14s linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.cube span {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 3px solid #15111f;
+  border-radius: 3px;
+  font-family: var(--display);
+  font-weight: 900;
+  font-size: 3rem;
+  line-height: 1;
+  color: #15111f;
+}
+
+.cube .f1 { transform: translateZ(calc(var(--s) / 2)); background: var(--pop); }
+.cube .f2 { transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); background: var(--a3); }
+.cube .f3 { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); background: var(--a1); }
+.cube .f4 { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); background: var(--a2); color: #f6f2ff; }
+.cube .f5 { transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); background: #f6f2ff; font-size: 2.2rem; }
+.cube .f6 { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); background: var(--pop); font-size: 2.2rem; }
+
+.cube .f2,
+.cube .f4 {
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cube-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 18%;
+  width: 120px;
+  height: 18px;
+  margin-left: -60px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6), transparent);
+  animation: cube-shadow 3.2s ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+
+.soon-chip {
+  background: rgba(246, 242, 255, 0.1);
+  color: #f6f2ff;
+  border-color: rgba(246, 242, 255, 0.5);
+  box-shadow: none;
+}
+
+.soon-body {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 20px 22px 24px;
+}
+
+.soon-body h3 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+
+.soon-body p {
+  color: rgba(246, 242, 255, 0.72);
+  font-size: 0.95rem;
+}
+
+.soon-pill {
+  justify-self: start;
+  margin-top: 6px;
+  padding: 10px 18px;
+  border: var(--b) dashed rgba(246, 242, 255, 0.5);
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: rgba(246, 242, 255, 0.82);
+}
+
+@keyframes cube-spin {
+  from {
+    transform: rotateX(-24deg) rotateY(0deg);
+  }
+  to {
+    transform: rotateX(-24deg) rotateY(360deg);
+  }
+}
+
+@keyframes cube-float {
+  from {
+    transform: translateY(-8px);
+  }
+  to {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes cube-shadow {
+  from {
+    transform: scale(0.78);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}
+
 /* -- beta: smaller screens ---------------------------------------------------------- */
 
 @media (max-width: 1000px) {
@@ -2086,7 +2259,10 @@ a.tile-in:active {
   .beta-scan::before,
   .live,
   .stamp.fresh .icon,
-  .player-toast.show {
+  .player-toast.show,
+  .cube,
+  .cube-float,
+  .cube-shadow {
     animation: none;
   }
 
