@@ -706,6 +706,7 @@ footer {
 
 footer .wrap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
@@ -726,6 +727,19 @@ footer a {
 
 footer a:hover {
   color: var(--text);
+}
+
+/* The studio's preview note: a line of its own under the links. */
+footer .foot-note {
+  flex-basis: 100%;
+  margin: 0;
+  max-width: 78ch;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+footer .foot-note a {
+  display: inline;
 }
 
 footer .mark {
