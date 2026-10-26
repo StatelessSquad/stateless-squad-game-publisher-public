@@ -1177,15 +1177,54 @@ a.tile-in:active {
  * floor, demo "cartridges" in each game's colours, and the Beta Pass ticket.
  */
 
+/* The arcade follows the page's theme: a lavender arcade in light, the
+ * neon one in dark. Everything in it takes these, never a fixed colour. */
 .beta {
-  --ink-d: #f6f2ff;
+  --beta-bg: #f3eefc;
+  --beta-ink: #15111f;
+  --beta-muted: #4a4360;
+  --beta-glow: 0.5;
+  --beta-tile: #ffffff;
+  --beta-stage: #ebe3fb;
+  --beta-grid: rgba(124, 92, 255, 0.16);
+  --beta-dash: rgba(21, 17, 31, 0.36);
+  --beta-chip: rgba(21, 17, 31, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .beta {
+    --beta-bg: #0b0816;
+    --beta-ink: #f6f2ff;
+    --beta-muted: #c9c0e6;
+    --beta-glow: 1;
+    --beta-tile: #0b0816;
+    --beta-stage: #120c24;
+    --beta-grid: rgba(49, 216, 255, 0.07);
+    --beta-dash: rgba(246, 242, 255, 0.42);
+    --beta-chip: rgba(246, 242, 255, 0.1);
+  }
+}
+
+:root[data-theme="dark"] .beta {
+  --beta-bg: #0b0816;
+  --beta-ink: #f6f2ff;
+  --beta-muted: #c9c0e6;
+  --beta-glow: 1;
+  --beta-tile: #0b0816;
+  --beta-stage: #120c24;
+  --beta-grid: rgba(49, 216, 255, 0.07);
+  --beta-dash: rgba(246, 242, 255, 0.42);
+  --beta-chip: rgba(246, 242, 255, 0.1);
+}
+
+.beta {
   position: relative;
   isolation: isolate;
   overflow: clip;
   margin-top: clamp(56px, 8vw, 96px);
   padding-block: clamp(64px, 9vw, 112px);
-  background: #0b0816;
-  color: var(--ink-d);
+  background: var(--beta-bg);
+  color: var(--beta-ink);
   border-block: var(--b) solid #15111f;
 }
 
@@ -1195,6 +1234,7 @@ a.tile-in:active {
   position: absolute;
   inset: 0;
   z-index: -2;
+  opacity: var(--beta-glow);
   background:
     radial-gradient(60% 50% at 50% 100%, color-mix(in srgb, var(--a2) 55%, transparent), transparent 70%),
     radial-gradient(40% 40% at 15% 0%, color-mix(in srgb, var(--a1) 35%, transparent), transparent 70%),
@@ -1279,7 +1319,7 @@ a.tile-in:active {
 .beta-line {
   margin-top: 16px;
   max-width: 54ch;
-  color: #c9c0e6;
+  color: var(--beta-muted);
   font-weight: 500;
   font-size: 1.12rem;
 }
@@ -1332,7 +1372,7 @@ a.tile-in:active {
   height: 26px;
   margin-top: -13px;
   border-radius: 50%;
-  background: #0b0816;
+  background: var(--beta-bg);
   border: var(--b) solid #15111f;
 }
 
@@ -1987,9 +2027,9 @@ a.tile-in:active {
 .soon {
   display: none;
   flex-direction: column;
-  background: #0b0816;
-  color: #f6f2ff;
-  border: var(--b) dashed rgba(246, 242, 255, 0.42);
+  background: var(--beta-tile);
+  color: var(--beta-ink);
+  border: var(--b) dashed var(--beta-dash);
   border-radius: 26px;
   box-shadow: 6px 6px 0 rgba(124, 92, 255, 0.5);
   overflow: hidden;
@@ -2020,12 +2060,12 @@ a.tile-in:active {
   display: grid;
   place-items: center;
   aspect-ratio: 4 / 5;
-  border-bottom: var(--b) dashed rgba(246, 242, 255, 0.28);
+  border-bottom: var(--b) dashed var(--beta-dash);
   background:
     radial-gradient(circle at 50% 44%, rgba(124, 92, 255, 0.34), transparent 58%),
-    linear-gradient(rgba(49, 216, 255, 0.07) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(90deg, rgba(49, 216, 255, 0.07) 1px, transparent 1px) 0 0 / 28px 28px,
-    #120c24;
+    linear-gradient(var(--beta-grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, var(--beta-grid) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--beta-stage);
   perspective: 720px;
 }
 
@@ -2087,9 +2127,9 @@ a.tile-in:active {
 }
 
 .soon-chip {
-  background: rgba(246, 242, 255, 0.1);
-  color: #f6f2ff;
-  border-color: rgba(246, 242, 255, 0.5);
+  background: var(--beta-chip);
+  color: var(--beta-ink);
+  border-color: var(--beta-dash);
   box-shadow: none;
 }
 
@@ -2108,7 +2148,7 @@ a.tile-in:active {
 }
 
 .soon-body p {
-  color: rgba(246, 242, 255, 0.72);
+  color: var(--beta-muted);
   font-size: 0.95rem;
 }
 
@@ -2116,12 +2156,12 @@ a.tile-in:active {
   justify-self: start;
   margin-top: 6px;
   padding: 10px 18px;
-  border: var(--b) dashed rgba(246, 242, 255, 0.5);
+  border: var(--b) dashed var(--beta-dash);
   border-radius: 999px;
   font-family: var(--display);
   font-weight: 800;
   font-size: 0.82rem;
-  color: rgba(246, 242, 255, 0.82);
+  color: var(--beta-ink);
 }
 
 @keyframes cube-spin {

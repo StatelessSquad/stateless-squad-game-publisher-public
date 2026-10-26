@@ -2,12 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://www.statelesssquad.com/</loc>
-    <lastmod>2026-10-25</lastmod>
+    <lastmod>2026-10-26</lastmod>
     <image:image><image:loc>https://www.statelesssquad.com/assets/og.png</image:loc></image:image>
   </url>
   <url>
     <loc>https://www.statelesssquad.com/notice/</loc>
-    <lastmod>2026-10-25</lastmod>
+    <lastmod>2026-10-26</lastmod>
   </url>
 <url>
     <loc>https://www.statelesssquad.com/buildingbytouching/</loc>
@@ -155,6 +155,6 @@
   </url>
 <url>
     <loc>https://www.statelesssquad.com/stateless-cube/</loc>
-    <lastmod>2026-10-25</lastmod>
+    <lastmod>2026-10-26</lastmod>
   </url>
 </urlset>
