@@ -1,7 +1,7 @@
 {
   "name": "Slingstar",
   "short_name": "Slingstar",
-  "description": "Slingstar is a one-tap space game. Sling a comet from planet to planet through six glowing galaxies, chain perfect catches into combo fever, and spend your stardust on trails, halos and cores. Calm music, no ads, no accounts, plays offline.",
+  "description": "Slingstar is a one-tap space game. Sling a comet from planet to planet through 100 levels, but only while the bright arc is open: tap outside its half second and the comet is thrown. Bonk saucers and alien swarms for points, chain perfect catches into combo fever, and fly new ships from the Hangar. No ads, no accounts, plays offline.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#07081a",

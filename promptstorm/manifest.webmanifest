@@ -1,7 +1,7 @@
 {
   "name": "Promptstorm",
   "short_name": "Promptstorm",
-  "description": "A vibecoder sprints down a neon circuit board through the galaxy, collecting AI tokens while the Hype Blimp throws budget cuts, SaaS, bots and agents at them. Run from the Garage through the Hackathon, Demo Day and Hypergrowth to The Cloud. Swipe to switch lanes, jump and slide; fill the Vibe bar and fire the laptop's Refactor beam. No ads, no accounts, plays offline.",
+  "description": "A vibecoder sprints down a neon circuit board through the galaxy, collecting AI tokens while the Hype Blimp throws budget cuts, SaaS, bots and agents at them. Run from the Garage through the Hackathon, Demo Day and Hypergrowth to The Cloud: endless, in the Daily Sprint, or through a hundred levels. Swipe to switch lanes, jump and slide; fill the Vibe bar and fire the laptop’s Refactor beam. No ads, no accounts, plays offline.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0c0a1d",

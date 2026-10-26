@@ -234,9 +234,11 @@ h1 {
   font-size: clamp(2.6rem, 7.4vw, 6rem);
 }
 
-/* The wordmark fits its column whatever the name's length: ~0.56em a letter. */
+/* The wordmark fits its column whatever the name's length: ~0.56em a letter.
+ * The floors are low so a long name (BuildingByTouching, 18 letters) shrinks to
+ * fit a phone instead of running off it; past them, it breaks between its halves. */
 .hero h1 {
-  font-size: clamp(2.2rem, min(7.4vw, calc(min(46vw, 560px) / (var(--chars, 8) * 0.56))), 6rem);
+  font-size: clamp(1.5rem, min(7.4vw, calc(min(46vw, 560px) / (var(--chars, 8) * 0.56))), 6rem);
   font-weight: 800;
   line-height: 0.94;
   letter-spacing: -0.045em;
@@ -791,7 +793,7 @@ summary:focus-visible {
   }
 
   .hero h1 {
-    font-size: clamp(2rem, calc((100vw - 48px) / (var(--chars, 8) * 0.56)), 4.4rem);
+    font-size: clamp(1.5rem, calc((100vw - 48px) / (var(--chars, 8) * 0.56)), 4.4rem);
   }
 
   .hero-media {
@@ -994,7 +996,7 @@ body.immersive {
 }
 
 .hero-x h1 {
-  font-size: clamp(4rem, min(15vw, calc(84vw / (var(--chars, 8) * 0.6))), 13rem);
+  font-size: clamp(2.5rem, min(15vw, calc(84vw / (var(--chars, 8) * 0.6))), 13rem);
   font-weight: 850;
   line-height: 0.86;
   letter-spacing: -0.06em;
@@ -1412,7 +1414,7 @@ body.immersive {
   }
 
   .hero-x h1 {
-    font-size: clamp(3.4rem, calc(88vw / (var(--chars, 8) * 0.6)), 9rem);
+    font-size: clamp(1.75rem, calc(88vw / (var(--chars, 8) * 0.6)), 9rem);
   }
 
   .chapter {
