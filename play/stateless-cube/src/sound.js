@@ -38,16 +38,23 @@
     try { localStorage.setItem(STORAGE_KEY, enabled ? 'on' : 'off'); } catch (_) { /* private mode */ }
   }
 
-  // The AudioContext must be created/resumed inside a user gesture on iOS.
+  // The AudioContext is created and resumed inside a user gesture, never
+  // before: a context created at page load (the game's start() plays a tap)
+  // stayed silent in Chrome even after the first click resumed it, so the
+  // game had no sound at all. Until the first gesture every sound is
+  // skipped. Creating a context is also expensive (it blocked the first
+  // touch for ~180ms on a throttled CPU), and a muted game doesn't need one;
+  // turning the sound on calls unlock() again from that tap.
   function unlock() {
-    // Creating an AudioContext is expensive (it blocked the first touch for
-    // ~180ms on a throttled CPU). A muted game does not need one; turning the
-    // sound on calls unlock() again from that tap.
-    if (unlocked || !enabled) return;
+    if (!enabled) return;
     const c = audio();
     if (!c) return;
     unlocked = true;
-    if (c.state === 'suspended') c.resume();
+    if (c.state !== 'running') c.resume().catch(() => {});
+  }
+
+  function running() {
+    return Boolean(ctx) && ctx.state === 'running';
   }
 
   function audio() {
@@ -60,17 +67,28 @@
         ctx = null;
         return null;
       }
+      // Full level at once: the context is born in the player's gesture,
+      // and that gesture's own sound plays straight away (a fade-in from
+      // silence swallowed the first move).
       master = ctx.createGain();
-      master.gain.value = 0.0001;
-      master.connect(ctx.destination);
-      master.gain.exponentialRampToValueAtTime(0.34, ctx.currentTime + 0.25);
+      master.gain.value = 0.34;
+      // A gentle compressor glues the layers together and lets the
+      // transients punch without the big combos clipping.
+      const glue = ctx.createDynamicsCompressor();
+      glue.threshold.value = -16;
+      glue.knee.value = 10;
+      glue.ratio.value = 4;
+      glue.attack.value = 0.002;
+      glue.release.value = 0.12;
+      master.connect(glue);
+      glue.connect(ctx.destination);
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     return ctx;
   }
 
   function ready() {
-    if (!enabled) return null;
+    if (!enabled || !unlocked) return null;
     return audio();
   }
 
@@ -149,10 +167,13 @@
   /* -- the palette ------------------------------------------------------- */
 
   const Sound = {
-    // A soft swish + low body for every slide.
+    // A short swish for the slide, then a soft wooden tick when the tiles
+    // land (the slide is 120 ms).
     move() {
-      noise({ freq: 620, sweep: 380, dur: 0.16, gain: 0.05, q: 0.8 });
-      tone(150, { type: 'sine', dur: 0.12, gain: 0.09, glide: 110 });
+      noise({ freq: 700, sweep: 420, dur: 0.11, gain: 0.05, q: 0.8 });
+      tone(150, { type: 'sine', dur: 0.1, gain: 0.08, glide: 110 });
+      noise({ filter: 'bandpass', freq: 1800, dur: 0.03, gain: 0.05, q: 3, delay: 0.115 });
+      tone(240, { type: 'triangle', dur: 0.05, gain: 0.06, glide: 180, delay: 0.115 });
     },
 
     // Merge: a bell pluck that climbs the pentatonic ladder with the tile
@@ -161,11 +182,24 @@
       const step = Math.min(LADDER.length - 1, Math.max(0, (level || 1) - 1));
       const lift = Math.min(12, (combo || 1) - 1) * 2;
       const freq = BASE * Math.pow(2, (LADDER[step] + lift) / 12);
+      // A few cents of drift, so a long chain doesn't sound like a loop.
+      const drift = (Math.random() - 0.5) * 14;
 
-      noise({ freq: 3200, dur: 0.05, gain: 0.035, q: 2 });
-      tone(freq, { type: 'triangle', dur: 0.3, gain: 0.3 });
-      tone(freq * 2, { type: 'sine', dur: 0.42, gain: 0.12, delay: 0.012 });
+      // The click: a very short bright transient in front of the bell.
+      tone(freq * 4, { type: 'square', dur: 0.018, gain: 0.04, attack: 0.001 });
+      noise({ freq: 4200, dur: 0.035, gain: 0.04, q: 2.5 });
+      tone(freq, { type: 'triangle', dur: 0.3, gain: 0.3, detune: drift, attack: 0.004 });
+      tone(freq * 2, { type: 'sine', dur: 0.42, gain: 0.12, delay: 0.012, detune: drift });
       tone(freq * 3, { type: 'sine', dur: 0.22, gain: 0.05, delay: 0.02 });
+    },
+
+    // The hit before a big merge (the hit-stop): a low thump and a snap,
+    // heavier for bigger tiles and longer combos.
+    impact(level, combo) {
+      const weight = Math.min(1, ((level || 3) - 2) / 9 + Math.max(0, (combo || 1) - 1) * 0.08);
+      tone(95, { type: 'sine', dur: 0.14 + weight * 0.08, gain: 0.18 + weight * 0.14, glide: 48, attack: 0.002 });
+      noise({ filter: 'lowpass', freq: 900, dur: 0.06, gain: 0.06 + weight * 0.06 });
+      noise({ freq: 5200, dur: 0.02, gain: 0.03 + weight * 0.03, q: 1.5 });
     },
 
     // A tiny blip when a new tile appears.
@@ -180,13 +214,20 @@
     },
 
     // Rising riser when a combo streaks.
+    // Each step of a streak climbs higher (a whole tone per step), and from
+    // ×4 a bright arpeggio sparkles on top.
     combo(n) {
       const c = ready();
       if (!c) return;
-      noise({ freq: 500, sweep: 4200, dur: 0.4, gain: 0.07, q: 3 });
-      tone(330 * Math.pow(2, Math.min(4, n - 2) / 12), {
-        type: 'sawtooth', dur: 0.4, gain: 0.07, glide: 660,
-      });
+      const steps = Math.min(10, Math.max(0, n - 2));
+      const from = 330 * Math.pow(2, (steps * 2) / 12);
+      noise({ freq: 500, sweep: 4200 + steps * 400, dur: 0.36, gain: 0.06 + steps * 0.006, q: 3 });
+      tone(from, { type: 'sawtooth', dur: 0.36, gain: 0.06, glide: from * 2 });
+      if (n >= 4) {
+        [0, 4, 7, 12].forEach((semi, i) => {
+          tone(from * 2 * Math.pow(2, semi / 12), { type: 'triangle', dur: 0.14, gain: 0.07, delay: 0.05 + i * 0.045 });
+        });
+      }
     },
 
     // UI click.
@@ -234,6 +275,7 @@
     /* -- settings --------------------------------------------------------- */
 
     unlock,
+    running,
     isEnabled() { return enabled; },
     setEnabled(on) {
       enabled = Boolean(on);

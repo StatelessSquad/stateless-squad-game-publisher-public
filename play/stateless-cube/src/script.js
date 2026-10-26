@@ -210,9 +210,22 @@ function setTheme(id) {
   // render/announce touch the DOM; only run them in the browser.
   if (typeof window !== 'undefined') {
     render();
+    themeWave();
     syncThemeRail();
     announce(`Theme: ${THEMES[id].label}`);
   }
+}
+
+// A new theme rolls over the board as a wave, from the top-left corner.
+let themeWaveTimer = 0;
+
+function themeWave() {
+  if (!ui.board || prefersReducedMotion()) return;
+  ui.board.classList.remove('theme-swap');
+  restyle(ui.board);
+  ui.board.classList.add('theme-swap');
+  clearTimeout(themeWaveTimer);
+  themeWaveTimer = setTimeout(() => ui.board.classList.remove('theme-swap'), 800);
 }
 
 /* -- colour mode (light / dark / system) --------------------------------- */
@@ -412,6 +425,30 @@ function nextCombo(combo, comboAt, now) {
   return now - comboAt <= COMBO_WINDOW_MS ? combo + 1 : 1;
 }
 
+// Pure: what a streak of `combo` merging moves looks like. `heat` (0..5)
+// drives the badge, the glow around the board, the shockwave and the sound.
+function comboTier(combo) {
+  if (combo >= 6) return { heat: 5, label: `Stateless ×${combo}!` };
+  if (combo === 5) return { heat: 4, label: 'Insane ×5!' };
+  if (combo === 4) return { heat: 3, label: 'Great ×4!' };
+  if (combo === 3) return { heat: 2, label: 'Combo ×3!' };
+  if (combo === 2) return { heat: 1, label: 'Nice!' };
+  return { heat: 0, label: '' };
+}
+
+// Pure: the hit-stop of a merge, in ms: how long the new tile holds its
+// squashed impact pose (white-hot) before it springs out and the effects
+// fire. Small merges don't stop; big tiles and long combos hit harder. Input
+// is never held: the next move is accepted as soon as the slide ends.
+const HIT_STOP_MAX_MS = 80;
+
+function hitStopMs(value, combo) {
+  const level = Math.log2(value || 1);
+  if (level < 3) return 0; // 2s and 4s: no stop
+  const ms = 10 + level * 5 + Math.max(0, (combo || 1) - 1) * 8;
+  return Math.min(HIT_STOP_MAX_MS, Math.round(ms));
+}
+
 /* -- gamification helpers (pure) ------------------------------------------ */
 
 // "m:ss" for the HUD timer; hours roll into the minutes ("72:05").
@@ -513,23 +550,28 @@ function levelName(level) {
 
 /* -- demo limit (pure) ------------------------------------------------------ */
 
-// The kit's demo (packages/kit/src/core/demo.ts), copied: this game does not
-// use the kit. `reach(n)` says the game moved to stage n (0 = the first);
-// reaching the stage after the last ends the demo. The page that embeds a
-// demo (an iframe) is told about the start, every stage and the end. Without
-// `options` it is inactive and every call does nothing.
-function createDemo(id, options, post = postToParent) {
+// The kit's demo (packages/kit/src/core/demo.ts, kit 1.1.5), copied: this
+// game does not use the kit. `reach(n)` says the game moved to stage n (0 =
+// the first); reaching the stage after the last ends the demo. The page that
+// embeds a demo (an iframe) is told about the start, every stage and the end.
+// A page that draws its own end card (the studio's player) says so with
+// { source: 'statelesssquad-host', type: 'end-card' }, and `hosted` turns
+// true; a hub such as itch.io says nothing, so the game shows its card there.
+// Without `options` it is inactive and every call does nothing.
+function createDemo(id, options, post = postToParent, listen = listenToParent) {
   const active = Boolean(options);
   const stages = (options && options.stages) || [];
   const ends = [];
   let stage = 0;
   let over = false;
+  let hosted = false;
   const send = (type) => post({ source: 'statelesssquad-demo', id, type, stage, stages });
   const demo = {
     active,
     options: options || null,
     get over() { return over; },
     get stage() { return stage; },
+    get hosted() { return hosted; },
     reach(n) {
       if (!active || over || !(n > stage)) return;
       stage = Math.min(n, stages.length);
@@ -545,8 +587,21 @@ function createDemo(id, options, post = postToParent) {
     },
     onEnd(fn) { ends.push(fn); },
   };
-  if (active) send('start');
+  if (active) {
+    listen((data) => {
+      if (data && typeof data === 'object' && data.source === 'statelesssquad-host' && data.type === 'end-card') hosted = true;
+    });
+    send('start');
+  }
   return demo;
+}
+
+// Hears the page around the game, if there is one: messages from any other
+// window are ignored.
+function listenToParent(fn) {
+  const self = typeof window !== 'undefined' ? window : globalThis;
+  if (!self.parent || self.parent === self || typeof self.addEventListener !== 'function') return;
+  self.addEventListener('message', (ev) => { if (ev.source === self.parent) fn(ev.data); });
 }
 
 // Tells the page around the game (the studio page's player), if there is one.
@@ -865,6 +920,13 @@ function render(spawned, mergedCells = [], entering) {
 
   const next = new Map();
   const stale = [];
+  // A tile that merges twice in a row must replay its pop: take the class
+  // off and resolve its style before it goes back on. The first restyle does
+  // the work; the others find the style clean.
+  mergedKeys.forEach((k) => {
+    const el = tileAt.get(k);
+    if (el && el.classList.contains('merged')) { el.classList.remove('merged'); restyle(el); }
+  });
 
   state.grid.forEach((row, r) => row.forEach((value, c) => {
     if (value === 0) return;
@@ -883,6 +945,7 @@ function render(spawned, mergedCells = [], entering) {
       }
       existing.classList.toggle('merged', isMerged);
       existing.classList.toggle('new', false);
+      existing.classList.toggle('moving', false);
       // The tile normally arrives here already in place (the slide moved it);
       // after an undo it may not be, so only write when it really differs.
       if (existing.style.getPropertyValue('--r') !== String(r) ||
@@ -1072,7 +1135,7 @@ function updateLevel() {
   setText(ui.levelValue, String(info.level));
   setText(ui.levelName, levelName(info.level));
   setStyle(ui.levelBadge, '--p', String(info.progress));
-  setStyle(ui.levelFill, 'width', `${pct}%`);
+  if (Date.now() >= levelWrap) setStyle(ui.levelFill, 'width', `${pct}%`);
   setText(ui.levelPct, `${pct}%`);
   if (info.next == null) {
     setText(ui.levelNext, 'Max level — you are Stateless!');
@@ -1084,6 +1147,24 @@ function updateLevel() {
   if (ui.levelBest.hidden === showBest) ui.levelBest.hidden = !showBest;
   if (showBest) setText(ui.levelBestValue, String(state.bestLevel));
   setAttr(ui.levelCard, 'aria-label', `Level ${info.level}, ${levelName(info.level)}, ${pct}% to the next level`);
+}
+
+// A level-up fills the bar to the end and wraps it round to the new level's
+// progress, instead of the fill sliding backwards.
+let levelWrap = 0;
+
+function wrapLevelBar() {
+  if (!ui.levelFill || prefersReducedMotion()) return;
+  levelWrap = Date.now() + 340;
+  setStyle(ui.levelFill, 'width', '100%');
+  setTimeout(() => {
+    levelWrap = 0;
+    ui.levelFill.classList.add('snap'); // no transition for the jump to 0
+    setStyle(ui.levelFill, 'width', '0%');
+    restyle(ui.levelFill);
+    ui.levelFill.classList.remove('snap');
+    updateLevel();
+  }, 340);
 }
 
 // The celebration for one or more level-ups in a single move.
@@ -1109,12 +1190,9 @@ function celebrateLevel(fromLevel, toLevel) {
   if (newRank || toLevel % 10 === 0) confettiBurst(newRank);
   sfx('levelUp', toLevel);
   haptic([14, 40, 14, 40, 30]);
-  toast(
-    jumps > 1
-      ? `⬆️ Level ${toLevel}! (+${jumps} levels)`
-      : `⬆️ Level ${toLevel}${newRank ? ` · ${levelName(toLevel)}!` : '!'}`,
-    'level'
-  );
+  // No toast: the banner over the board says it, and a toast here covered
+  // the score in the middle of a combo.
+  wrapLevelBar();
   announce(`Level ${toLevel}, ${levelName(toLevel)}.`);
 }
 
@@ -1124,10 +1202,24 @@ const TOAST_MS = 2600;
 
 function toast(text, kind) {
   if (!ui.toasts) return;
-  // Keep the stack short: the oldest toast leaves when a fourth arrives.
-  while (ui.toasts.children.length >= 3) ui.toasts.firstChild.remove();
+  // One toast per kind: a second "new tile" in a combo chain updates the one
+  // on screen (and pops it) instead of stacking over the score.
+  const same = kind && Array.from(ui.toasts.children)
+    .find((el) => el.dataset.kind === kind && !el.classList.contains('out'));
+  if (same) {
+    same.textContent = text;
+    same.classList.remove('again');
+    restyle(same);
+    same.classList.add('again');
+    clearTimeout(same.leaveTimer);
+    same.leaveTimer = setTimeout(() => leaveToast(same), TOAST_MS);
+    return;
+  }
+  // Keep the stack short: two at most, the oldest leaves first.
+  while (ui.toasts.children.length >= 2) ui.toasts.firstChild.remove();
   const el = document.createElement('div');
   el.className = `toast${kind ? ` toast-${kind}` : ''}`;
+  el.dataset.kind = kind || '';
   el.textContent = text;
   ui.toasts.appendChild(el);
   // Stack the toasts with absolute positions: a toast that leaves must not
@@ -1136,12 +1228,14 @@ function toast(text, kind) {
   // Force the start state, then let the transition run.
   restyle(el);
   el.classList.add('in');
-  setTimeout(() => {
-    el.classList.remove('in');
-    el.classList.add('out');
-    el.addEventListener('transitionend', () => { el.remove(); layoutToasts(); }, { once: true });
-    setTimeout(() => { el.remove(); layoutToasts(); }, 600); // safety net
-  }, TOAST_MS);
+  el.leaveTimer = setTimeout(() => leaveToast(el), TOAST_MS);
+}
+
+function leaveToast(el) {
+  el.classList.remove('in');
+  el.classList.add('out');
+  el.addEventListener('transitionend', () => { el.remove(); layoutToasts(); }, { once: true });
+  setTimeout(() => { el.remove(); layoutToasts(); }, 600); // safety net
 }
 
 // Places every toast on its own row without affecting the others.
@@ -1306,6 +1400,45 @@ function tilt(dir) {
   setTimeout(() => ui.board.classList.remove(`tilt-${dir}`), SLIDE_MS + 160);
 }
 
+function prefersReducedMotion() {
+  return typeof window !== 'undefined' && Boolean(window.matchMedia) &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+// The axis of the last move, for the squash and stretch of the tiles: they
+// stretch along it while they travel and squash along it when they hit.
+let moveAxis = '';
+
+function setMoveAxis(dir) {
+  if (!ui.board) return;
+  const axis = dir === 'left' || dir === 'right' ? 'move-x' : 'move-y';
+  if (axis === moveAxis) return;
+  if (moveAxis) ui.board.classList.remove(moveAxis);
+  ui.board.classList.add(axis);
+  moveAxis = axis;
+}
+
+// A move that goes nowhere: the tiles squash against the wall they pushed.
+function bumpWall(dir) {
+  if (!ui.board) return;
+  const cls = `bump-${dir}`;
+  ['bump-left', 'bump-right', 'bump-up', 'bump-down'].forEach((c) => ui.board.classList.remove(c));
+  restyle(ui.board);
+  ui.board.classList.add(cls);
+  setTimeout(() => ui.board && ui.board.classList.remove(cls), 260);
+}
+
+// Combo heat (0..5): a glow inside the board that grows with the streak and
+// dies with the combo window. Opacity only, on a layer of its own.
+let heatTimer = 0;
+
+function setHeat(heat) {
+  if (!ui.board) return;
+  setAttr(ui.board, 'data-heat', String(heat));
+  clearTimeout(heatTimer);
+  if (heat > 0) heatTimer = setTimeout(() => setAttr(ui.board, 'data-heat', '0'), COMBO_WINDOW_MS);
+}
+
 // Emoji rain: the merged symbol (or any glyph) rises out of the board.
 function emojiRain(sym, count) {
   if (hasFX()) FX.rain(sym, count || 8);
@@ -1336,11 +1469,12 @@ function shake() {
   setTimeout(() => ui.board && ui.board.classList.remove('shake'), 360);
 }
 
-// Floating combo badge above the board.
-function comboBadge(text) {
+// Floating combo badge above the board; it grows and heats up with the tier.
+function comboBadge(text, heat) {
   if (!ui.combo) return;
   const el = ui.combo;
   el.textContent = text;
+  setAttr(el, 'data-heat', String(heat || 0));
   el.classList.remove('go');
   restyle(el);
   el.classList.add('go');
@@ -1436,7 +1570,7 @@ function checkEnd() {
       goal.sym,
       hideOverlay
     );
-    comboBadge('StateLess!');
+    comboBadge('StateLess!', 5);
   } else if (isGameOver()) {
     state.over = true;
     pauseTimer();
@@ -1504,8 +1638,9 @@ function creditScore(gained) {
 }
 
 // The end of a demo: the game stops for good. state.over blocks every move,
-// booster and timer; the CSS loops pause. Inside the studio page the page
-// shows its own end card; on its own, the game shows one.
+// booster and timer; the CSS loops pause. A page that said it draws the end
+// card (the studio's player) gets it; anywhere else (on its own, or in a
+// hub's iframe such as itch.io's) the game shows one.
 function endDemo() {
   state.over = true;
   pauseTimer();
@@ -1522,8 +1657,8 @@ function endDemo() {
   document.documentElement.classList.add('demo-over');
   // Nothing outside the board answers any more (theme, sound, the dock).
   document.querySelectorAll('.app > :not(.board-wrap)').forEach((el) => { el.inert = true; });
-  if (window.parent !== window) return;
-  setTimeout(showDemoEnd, 400);
+  // Checked after the pause, so a page that answers `end` still counts.
+  setTimeout(() => { if (!demo.hosted) showDemoEnd(); }, 400);
 }
 
 function showDemoEnd() {
@@ -1562,6 +1697,7 @@ function play(dir) {
     updateUndoButton();
     sfx('invalid');
     shake();
+    bumpWall(dir);
     haptic(18);
     return;
   }
@@ -1570,6 +1706,7 @@ function play(dir) {
   resumeTimer();
   sfx('move');
   tilt(dir);
+  setMoveAxis(dir);
 
   // 1. Slide the existing tiles to their destinations (CSS transition) and
   //    keep the cell -> element map in step, so the next render can reuse the
@@ -1587,6 +1724,8 @@ function play(dir) {
       droppedTiles.push(el);
       return;
     }
+    // Tiles that travel stretch along the way (squash and stretch).
+    if (from !== to) el.classList.add('moving');
     setPosition(el, m.to);
     tileAt.set(to, el);
   });
@@ -1624,34 +1763,56 @@ function play(dir) {
       updateStreak();
 
       const level = Math.log2(merged[0].value);
-      const topLevel = Math.log2(Math.max(...merged.map((m) => m.value))) + 1; // value of the result tile
-      sfx('merge', level, state.combo);
-      haptic(state.combo > 1 ? 24 : 12);
+      const top = Math.max(...merged.map((m) => m.value)) * 2; // the biggest new tile
+      const topLevel = Math.log2(top);
+      const tier = comboTier(state.combo);
+      // The hit: the new tiles hold a squashed, white-hot pose for a beat
+      // (the CSS reads --hold), the particles in the air nearly stop, and
+      // only then does everything burst. Input is not held.
+      const hold = prefersReducedMotion() ? 0 : hitStopMs(top, state.combo);
+      mergedCells.forEach((cell) => setStyle(tileAt.get(key(cell)), '--hold', `${hold}ms`));
+      if (hold) {
+        if (hasFX()) FX.hitstop(hold);
+        sfx('impact', topLevel, state.combo);
+      }
+      setHeat(tier.heat);
 
       const theme = THEMES[currentTheme] || THEMES[DEFAULT_THEME];
       const palette = [theme.accent, theme.accent2, '#ffffff', theme.goal.to];
-      merged.forEach((m) => {
-        explode(m.to, Math.log2(m.value) + 1, palette, { extra: doubled ? 8 : 0 });
-        ripple(m.to, theme.accent);
-        // 128 and up: the new tile glitters for a moment.
-        if (m.value * 2 >= 128 && hasFX()) {
-          const { x, y } = cellCenter(m.to);
-          FX.sparkle(x, y, geometry().cell * 0.62, ['#ffffff', theme.accent2, theme.goal.to], 4 + Math.log2(m.value * 2) - 6);
+      const burst = () => {
+        sfx('merge', level, state.combo);
+        haptic(state.combo > 1 ? 14 + tier.heat * 4 : 12);
+        merged.forEach((m) => {
+          explode(m.to, Math.log2(m.value) + 1, palette, { extra: (doubled ? 8 : 0) + tier.heat * 3 });
+          ripple(m.to, theme.accent);
+          // 128 and up: the new tile glitters for a moment.
+          if (m.value * 2 >= 128 && hasFX()) {
+            const { x, y } = cellCenter(m.to);
+            FX.sparkle(x, y, geometry().cell * 0.62, ['#ffffff', theme.accent2, theme.goal.to], 4 + Math.log2(m.value * 2) - 6);
+          }
+        });
+        if (tier.heat) {
+          comboBadge(tier.label, tier.heat);
+          sfx('combo', state.combo);
+          haptic([10, 30, 10 + tier.heat * 6]);
         }
-      });
-      if (state.combo > 1) {
-        comboBadge(state.combo >= 3 ? `Combo ×${state.combo}!` : 'Nice!');
-        sfx('combo', state.combo);
-        haptic([10, 30, 10]);
-      }
-      if (state.combo >= 3) {
-        emojiRain(themeFor(merged[0].value * 2).sym, Math.min(14, 4 + state.combo * 2));
-      }
-      if (topLevel >= 8) flash(theme.accent); // 256 and up light the room
-      checkUnlock();
+        // From ×3 a shockwave rolls out of the first merge, bigger every step.
+        if (tier.heat >= 2 && hasFX() && tileAt.get(key(merged[0].to))) {
+          const { x, y } = cellCenter(merged[0].to);
+          FX.shock(x, y, [theme.accent, theme.accent2, '#ffffff'], tier.heat);
+        }
+        if (state.combo >= 3) {
+          emojiRain(themeFor(merged[0].value * 2).sym, Math.min(16, 4 + state.combo * 2));
+        }
+        if (topLevel >= 8 || tier.heat >= 4) flash(theme.accent); // 256 and up light the room
+        checkUnlock();
+      };
+      if (hold) setTimeout(burst, hold);
+      else burst();
     } else {
       state.combo = 0;
       updateStreak();
+      setHeat(0);
       sfx('spawn');
     }
 
@@ -1682,6 +1843,7 @@ function start() {
   cancelTargeting();
   newGame();
   resetTimer();
+  setHeat(0);
   render();
   updateUndoButton();
   updateStreak();
@@ -2046,14 +2208,18 @@ function boot() {
     else if (state.moves > 0 && !state.over) resumeTimer();
   });
 
-  // The first gesture unlocks the audio context (iOS requires it).
+  // A gesture unlocks the audio (browsers only allow sound after one). The
+  // listeners are on window in the capture phase, so they run before the
+  // game's own handlers and the first move already has its sound. They stay
+  // until the context really runs: on iOS a touch's pointerdown may not
+  // count as a gesture, its touchend or click does.
+  const UNLOCK_EVENTS = ['pointerdown', 'touchend', 'click', 'keydown'];
   const unlock = () => {
-    if (typeof Sound !== 'undefined') Sound.unlock();
-    document.removeEventListener('pointerdown', unlock);
-    document.removeEventListener('keydown', unlock);
+    if (typeof Sound === 'undefined') return;
+    Sound.unlock();
+    if (Sound.running()) UNLOCK_EVENTS.forEach((t) => window.removeEventListener(t, unlock, true));
   };
-  document.addEventListener('pointerdown', unlock);
-  document.addEventListener('keydown', unlock);
+  UNLOCK_EVENTS.forEach((t) => window.addEventListener(t, unlock, true));
 
   maybeAutoplay();
   start();
@@ -2095,6 +2261,7 @@ if (typeof module !== 'undefined' && module.exports) {
     THEME_MODE_KEY, themeMode, loadThemeMode, saveThemeMode,
     applyThemeMode, cycleThemeMode,
     snapshot, remember, applySnapshot, undo, canUndo, COMBO_WINDOW_MS, nextCombo,
+    comboTier, hitStopMs, HIT_STOP_MAX_MS,
     setDemoMode,
     // gamification
     CHARGE_MAX, COMBO_CHARGE_BONUS, DOUBLE_MERGES, MILESTONES, BOOSTERS, BOOSTER_IDS,

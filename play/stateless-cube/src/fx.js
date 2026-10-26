@@ -36,6 +36,7 @@
   let dpr = 1;
   let raf = 0;
   let last = 0;
+  let frozenUntil = 0; // hit-stop: particles crawl until then
   const parts = [];
 
   const glowCache = new Map();
@@ -168,8 +169,11 @@
   }
 
   function tick(now) {
-    const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+    let dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
     last = now;
+    // Hit-stop: everything in the air nearly stops for a beat, so the hit
+    // that caused it reads as heavy.
+    if (now < frozenUntil) dt *= 0.08;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -394,6 +398,44 @@
     }
   }
 
+  // A combo shockwave: rings that follow each other out of the cell, and
+  // streaks thrown flat along them. `heat` is the combo tier (1..5).
+  function shock(x, y, colors, heat) {
+    if (disabled()) return;
+    const cols = colors && colors.length ? colors : ['#ffffff'];
+    const n = Math.max(1, Math.min(5, heat || 1));
+    for (let i = 0; i < Math.min(3, n); i++) {
+      const p = base('ring', x, y, 0.5 + i * 0.08);
+      p.age = -i * 0.07;
+      p.r0 = 10;
+      p.r1 = 70 + n * 22 + i * 18;
+      p.w0 = 4 + n;
+      p.w1 = 1;
+      p.alpha = 0.9 - i * 0.2;
+      p.color = cols[i % cols.length];
+      add(p);
+    }
+    const streaks = 6 + n * 4;
+    for (let i = 0; i < streaks; i++) {
+      const p = base('spark', x, y, rand(0.3, 0.5));
+      const a = (Math.PI * 2 * i) / streaks + rand(-0.1, 0.1);
+      const v = rand(520, 760) + n * 60;
+      p.vx = Math.cos(a) * v;
+      p.vy = Math.sin(a) * v;
+      p.drag = 0.86;
+      p.size = rand(6, 9) + n;
+      p.img = glow(cols[i % cols.length]);
+      add(p);
+    }
+  }
+
+  // Hit-stop for the particles already in the air (see tick).
+  function hitstop(ms) {
+    if (disabled() || !(ms > 0)) return;
+    const now = global.performance ? global.performance.now() : Date.now();
+    frozenUntil = Math.max(frozenUntil, now + ms);
+  }
+
   // Emoji rising out of the board.
   function rain(sym, count) {
     if (disabled()) return;
@@ -416,6 +458,8 @@
     ring,
     sparkle,
     rain,
+    shock,
+    hitstop,
     count() { return parts.length; },
     clear() { parts.length = 0; },
   };

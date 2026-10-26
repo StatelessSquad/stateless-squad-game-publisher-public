@@ -600,6 +600,10 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
   transition: width 520ms var(--ease);
 }
 
+/* The level-up wrap: the bar fills to the end (above), then jumps to 0
+   without a transition and grows to the new level's progress. */
+.level-fill.snap { transition: none; }
+
 /* Level-up banner over the board. */
 .level-banner {
   position: absolute;
@@ -894,10 +898,41 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
 .tile.len-4 .tile-glyph { font-size: clamp(1rem, 6.5vmin, 1.6rem); }
 .tile.len-5 .tile-glyph { font-size: clamp(0.85rem, 5.5vmin, 1.3rem); }
 
-.tile.new .tile-inner { animation: spawn-pop 260ms var(--spring) both; }
+.tile.new .tile-inner { animation: spawn-pop 300ms var(--spring) both; }
 .tile.merged { z-index: 2; }
-.tile.merged .tile-inner { animation: merge-pop 420ms var(--spring); }
-.tile.merged .tile-glyph { animation: glyph-pop 420ms var(--spring); }
+
+/* Squash and stretch, transform only, on .tile-inner (the .tile carries the
+ * position). A travelling tile stretches along the move; a merged tile lands
+ * squashed along it and holds that pose white-hot for the hit-stop (--hold,
+ * set per tile by script.js, 0 for small merges), then springs out. The
+ * impact animation is listed last so it wins while it runs. */
+.board.move-x .tile.moving .tile-inner { animation: stretch-x var(--slide) var(--ease); }
+.board.move-y .tile.moving .tile-inner { animation: stretch-y var(--slide) var(--ease); }
+
+.tile.merged .tile-inner {
+  animation: merge-pop 440ms var(--spring) var(--hold, 0ms) both, impact var(--hold, 0ms) linear;
+}
+.board.move-x .tile.merged .tile-inner { animation-name: merge-pop-x, impact-x; }
+.board.move-y .tile.merged .tile-inner { animation-name: merge-pop-y, impact-y; }
+.tile.merged .tile-glyph { animation: glyph-pop 440ms var(--spring) var(--hold, 0ms) both; }
+
+/* The hit flash: white during the hold, then it fades off the new tile. */
+.tile.merged .tile-shine {
+  background: radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.6) 62%, rgba(255, 255, 255, 0.3));
+  animation: hit-flash 220ms ease-out var(--hold, 0ms) both;
+}
+
+/* A move that goes nowhere: the tiles squash against the wall. */
+.board.bump-left .tile-inner { transform-origin: 0% 50%; animation: bump-x 240ms var(--ease); }
+.board.bump-right .tile-inner { transform-origin: 100% 50%; animation: bump-x 240ms var(--ease); }
+.board.bump-up .tile-inner { transform-origin: 50% 0%; animation: bump-y 240ms var(--ease); }
+.board.bump-down .tile-inner { transform-origin: 50% 100%; animation: bump-y 240ms var(--ease); }
+
+/* A new theme rolls over the board, corner to corner (--r, --c are the
+ * tile's cell, inherited from .tile). */
+.board.theme-swap .tile-inner {
+  animation: theme-wave 460ms var(--spring) calc((var(--r) + var(--c)) * 45ms) both;
+}
 
 /* Goal tile — the StateLess-Cube. */
 .tile.goal .tile-inner {
@@ -971,21 +1006,79 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
 }
 
 @keyframes spawn-pop {
-  0% { transform: scale(0.3); opacity: 0; }
-  60% { transform: scale(1.08); opacity: 1; }
+  0% { transform: scale(0.2); opacity: 0; }
+  50% { transform: scale(1.12, 0.9); opacity: 1; }
+  72% { transform: scale(0.95, 1.05); }
   100% { transform: scale(1); opacity: 1; }
 }
 
+@keyframes stretch-x {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(1.1, 0.92); }
+}
+
+@keyframes stretch-y {
+  0%, 100% { transform: scale(1); }
+  45% { transform: scale(0.92, 1.1); }
+}
+
+/* The hit-stop poses: held for --hold, no motion. */
+@keyframes impact { from, to { transform: scale(0.88); } }
+@keyframes impact-x { from, to { transform: scale(0.8, 1.14); } }
+@keyframes impact-y { from, to { transform: scale(1.14, 0.8); } }
+
+/* The release: from the impact pose, out past round, settle. (The old pop
+ * animated a brightness filter; the white flash layer replaces it.) */
 @keyframes merge-pop {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.22); filter: brightness(1.35) saturate(1.2); }
-  60% { transform: scale(0.96); }
-  100% { transform: scale(1); filter: none; }
+  0% { transform: scale(0.88); }
+  32% { transform: scale(1.24); }
+  58% { transform: scale(0.95); }
+  78% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes merge-pop-x {
+  0% { transform: scale(0.8, 1.14); }
+  30% { transform: scale(1.26, 0.88); }
+  55% { transform: scale(0.94, 1.06); }
+  76% { transform: scale(1.03, 0.98); }
+  100% { transform: scale(1); }
+}
+
+@keyframes merge-pop-y {
+  0% { transform: scale(1.14, 0.8); }
+  30% { transform: scale(0.88, 1.26); }
+  55% { transform: scale(1.06, 0.94); }
+  76% { transform: scale(0.98, 1.03); }
+  100% { transform: scale(1); }
+}
+
+@keyframes hit-flash {
+  0% { opacity: 1; }
+  25% { opacity: 0.55; }
+  100% { opacity: 0; }
 }
 
 @keyframes glyph-pop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.35) rotate(-4deg); }
+  0% { transform: scale(0.9); }
+  40% { transform: scale(1.38) rotate(-5deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes bump-x {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(0.84, 1.06); }
+}
+
+@keyframes bump-y {
+  0%, 100% { transform: scale(1); }
+  35% { transform: scale(1.06, 0.84); }
+}
+
+@keyframes theme-wave {
+  0% { transform: scale(1) rotate(0); }
+  35% { transform: scale(0.72) rotate(-10deg); }
+  70% { transform: scale(1.08) rotate(3deg); }
   100% { transform: scale(1) rotate(0); }
 }
 
@@ -1076,6 +1169,40 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
 }
 
 .board.levelup::after { animation: levelup 900ms var(--ease); }
+
+/* Combo heat: a glow inside the rim that grows with the streak and fades
+ * when the combo window closes. Opacity only, on its own layer; from ×5 it
+ * throbs (opacity again) until the heat drops. */
+.board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  will-change: opacity;
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--theme-accent) 80%, transparent),
+    inset 0 0 38px 2px var(--theme-accent),
+    inset 0 0 90px -10px var(--theme-accent-2);
+  transition: opacity 420ms var(--ease);
+}
+
+.board[data-heat="1"]::before { opacity: 0.22; }
+.board[data-heat="2"]::before { opacity: 0.45; transition-duration: 160ms; }
+.board[data-heat="3"]::before { opacity: 0.7; transition-duration: 120ms; }
+.board[data-heat="4"]::before,
+.board[data-heat="5"]::before {
+  opacity: 0.9;
+  transition-duration: 100ms;
+  animation: heat-throb 360ms ease-in-out infinite alternate;
+}
+
+@keyframes heat-throb {
+  from { opacity: 0.65; }
+  to { opacity: 1; }
+}
 
 @keyframes levelup {
   0% { opacity: 0; }
@@ -1227,7 +1354,7 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
   left: 0;
   right: 0;
   margin: 0 auto;
-  padding: 10px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius-pill);
   background: var(--surface-strong);
   border: 1px solid var(--border);
@@ -1236,8 +1363,9 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
   box-shadow: var(--shadow-lift);
   color: var(--text);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   letter-spacing: -0.01em;
+  width: max-content;
   max-width: 100%;
   text-align: center;
   opacity: 0;
@@ -1246,6 +1374,13 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
 }
 
 .toast.in { opacity: 1; transform: translateY(0) scale(1); }
+.toast.in.again { animation: toast-again 300ms var(--spring); }
+
+@keyframes toast-again {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
 .toast.out { opacity: 0; transform: translateY(-10px) scale(0.96); }
 
 .toast-milestone,
@@ -1300,6 +1435,22 @@ html[data-theme="system"] .twinkle { color: #fff8e1; }
 }
 
 .combo-badge.go { animation: combo-pop 1100ms var(--spring) forwards; }
+
+/* The badge grows and heats up with the combo tier (script.js comboTier). */
+.combo-badge[data-heat="2"] { font-size: 1.05rem; }
+.combo-badge[data-heat="3"] {
+  font-size: 1.15rem;
+  background: linear-gradient(120deg, #ff8a3d, var(--theme-accent), var(--theme-accent-2));
+}
+.combo-badge[data-heat="4"],
+.combo-badge[data-heat="5"] {
+  font-size: 1.28rem;
+  padding: 8px 20px;
+  letter-spacing: 0.01em;
+  background: linear-gradient(120deg, #ffd166, #ff6b3d 35%, var(--theme-accent) 70%, var(--theme-accent-2));
+  text-shadow: 0 1px 0 rgba(80, 20, 0, 0.35);
+}
+.combo-badge[data-heat="5"] { font-size: 1.4rem; }
 
 @keyframes combo-pop {
   0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.6); }
@@ -1734,8 +1885,17 @@ html.clean .instructions { display: none; }
   .level-strip,
   .level-chip,
   .level-num,
-  .level-banner {
+  .level-banner,
+  .tile-shine,
+  .toast {
     animation-duration: 1ms !important;
+  }
+
+  /* No combo heat glow and no throb. */
+  .board::before {
+    animation: none !important;
+    transition: none;
+    display: none;
   }
 
   .level-fill,

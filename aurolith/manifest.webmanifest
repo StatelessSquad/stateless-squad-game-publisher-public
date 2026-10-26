@@ -1,7 +1,7 @@
 {
   "name": "Aurolith",
   "short_name": "Aurolith",
-  "description": "Drop glowing slabs onto a turning tower of light. Land one dead on and it stays whole; miss by a little and the overhang shears away. The higher you climb, the faster it turns. Climb from dawn through the cloud sea, the aurora and orbit to the nebula. No ads, no accounts, plays offline.",
+  "description": "Drop glowing slabs onto a turning tower of light. Land one dead on and it stays whole; miss by a little and the overhang shears away. The higher you climb, the faster it turns. Climb 100 levels from dawn through the cloud sea, the aurora, orbit and the nebula to the zenith. No ads, no accounts, plays offline.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#070520",
