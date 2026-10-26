@@ -8,7 +8,10 @@
  * The page learns the stage from the demo itself: a demo build (kit 1.1+,
  * or StateLess-Cube's) posts
  *   { source: 'statelesssquad-demo', type: 'start' | 'stage' | 'end', stage }
- * to the page around it.
+ * to the page around it. The page answers `start` with
+ *   { source: 'statelesssquad-host', type: 'end-card' }
+ * ("this page draws the end card"), so a demo on kit 1.1.5+ leaves its own
+ * out here, and still shows it anywhere else (on its own, or on itch.io).
  */
 (() => {
   const dialog = /** @type {HTMLDialogElement | null} */ (document.querySelector('.player'));
@@ -164,7 +167,8 @@
   window.addEventListener('message', (ev) => {
     const d = ev.data;
     if (!game || ev.source !== frame.contentWindow || !d || d.source !== 'statelesssquad-demo') return;
-    if (d.type === 'end') finish();
+    if (d.type === 'start') frame.contentWindow?.postMessage({ source: 'statelesssquad-host', type: 'end-card' }, '*');
+    else if (d.type === 'end') finish();
     else if (d.type === 'stage') onStage(Number(d.stage));
   });
 
