@@ -1228,11 +1228,25 @@ a.tile-in:active {
    * ticker's angle (-1.6deg: tan × 100vw ≈ 2.8vw), so the band is the only
    * divider between the hero and the arcade. */
   margin-top: -44px;
-  padding-block: clamp(120px, 12vw, 170px) clamp(64px, 9vw, 112px);
+  padding-block: clamp(120px, 12vw, 170px) clamp(104px, 13vw, 176px);
   clip-path: polygon(0 2.8vw, 100% 0, 100% 100%, 0 100%);
-  background: var(--beta-bg);
+  /* No seam below either: under the last row of cards the arcade turns into
+   * the page's own background (eased stops: a straight ramp shows where it
+   * starts), and the glow and the floor fade out with it. Every layer ends
+   * on the page's colour, so even the edge's half-covered pixel row matches
+   * the shelves below. */
+  --beta-fade: clamp(150px, 17vw, 250px);
+  background:
+    linear-gradient(
+      to bottom,
+      var(--beta-bg) calc(100% - var(--beta-fade)),
+      color-mix(in srgb, var(--bg) 22%, var(--beta-bg)) calc(100% - var(--beta-fade) * 0.72),
+      color-mix(in srgb, var(--bg) 62%, var(--beta-bg)) calc(100% - var(--beta-fade) * 0.45),
+      color-mix(in srgb, var(--bg) 90%, var(--beta-bg)) calc(100% - var(--beta-fade) * 0.24),
+      var(--bg) calc(100% - var(--beta-fade) * 0.1)
+    )
+    var(--bg);
   color: var(--beta-ink);
-  border-bottom: var(--b) solid #15111f;
 }
 
 .beta::before {
@@ -1242,6 +1256,7 @@ a.tile-in:active {
   inset: 0;
   z-index: -2;
   opacity: var(--beta-glow);
+  mask-image: linear-gradient(to top, transparent calc(var(--beta-fade) * 0.1), #000 var(--beta-fade));
   background:
     radial-gradient(60% 50% at 50% 100%, color-mix(in srgb, var(--a2) 55%, transparent), transparent 70%),
     radial-gradient(40% 40% at 15% 0%, color-mix(in srgb, var(--a1) 35%, transparent), transparent 70%),
@@ -1256,7 +1271,9 @@ a.tile-in:active {
   z-index: -1;
   perspective: 420px;
   pointer-events: none;
-  mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  /* The bottom 18% of this box hangs below the arcade (-10% of 55%): the floor's
+   * front edge fades out there instead of ending on a line. */
+  mask-image: linear-gradient(to top, transparent 18%, #000 42%, transparent 90%);
 }
 
 .beta-scan::before {
