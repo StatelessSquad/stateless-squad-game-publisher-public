@@ -6,7 +6,7 @@ Live at https://www.statelesssquad.com/
 
 This folder is a build output of `stateless-squad-game-publisher`; do not edit it by hand.
 
-- [STM Defender](https://www.statelesssquad.com/stm-defender/): Defend the kingdom of Solva-Tino-Marko.
+- [STM Defender](https://www.statelesssquad.com/stm-defender/): Defend the kingdom of Solva-⁠Tino-⁠Marko.
 - [BuildingByTouching](https://www.statelesssquad.com/buildingbytouching/): Tap. Build. Glow.
 - [Slingstar](https://www.statelesssquad.com/slingstar/): Tap. Sling. Shine.
 - [Snike](https://www.statelesssquad.com/snike/): Eat the light. Grow legs. Bite the dark.
