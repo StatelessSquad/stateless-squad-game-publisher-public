@@ -1143,7 +1143,8 @@ body.immersive {
   justify-content: center;
 }
 
-/* The light behind a shot: a gradient, never a blur. */
+/* The light behind a shot: a gradient, never a blur. Each light fades out
+ * inside its box; one that runs past the edge is cut there in a hard line. */
 .chapter-art::before,
 .evolve-art::before {
   content: "";
@@ -1152,7 +1153,7 @@ body.immersive {
   z-index: -1;
   background:
     radial-gradient(closest-side, color-mix(in srgb, var(--accent2) 42%, transparent), transparent),
-    radial-gradient(40% 40% at 70% 70%, color-mix(in srgb, var(--accent3) 30%, transparent), transparent);
+    radial-gradient(34% 34% at 66% 66%, color-mix(in srgb, var(--accent3) 30%, transparent), transparent);
 }
 
 .chapter-art img,
