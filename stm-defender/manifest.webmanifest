@@ -1,0 +1,16 @@
+{
+  "name": "STM Defender",
+  "short_name": "STM Defender",
+  "description": "Creatures pour out of the Murk and march on the kingdom of Solva-Tino-Marko. Raise the three founders' towers beside the road, link them into a Crown, and keep the gate. Fifty stages of ten waves, each on its own ground and each with a creature you haven't met, from the first Gloop to the Murk King. Arrow posts, barricades, a Viking warband and the Wizard Stream; seasons and weather that change the battle; coins and chests to tap up for your bank. No ads, no accounts, plays offline.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1030",
+  "theme_color": "#4c74cc",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

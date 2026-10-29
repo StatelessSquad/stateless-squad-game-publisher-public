@@ -2,12 +2,36 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://www.statelesssquad.com/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-29</lastmod>
     <image:image><image:loc>https://www.statelesssquad.com/assets/og.png</image:loc></image:image>
   </url>
   <url>
     <loc>https://www.statelesssquad.com/notice/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-29</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stm-defender/</loc>
+    <lastmod>2026-10-29</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/ground1.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/ground14.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/ground44.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/crown.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stm-defender/assets/shots/boss.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/stm-defender/assets/shots/hero.webp</video:thumbnail_loc><video:title>STM Defender gameplay</video:title><video:description>Defend the kingdom of Solva-Tino-Marko.</video:description><video:content_loc>https://www.statelesssquad.com/stm-defender/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stm-defender/privacy/</loc>
+    <lastmod>2026-10-29</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stm-defender/support/</loc>
+    <lastmod>2026-10-29</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stm-defender/terms/</loc>
+    <lastmod>2026-10-29</lastmod>
   </url>
 <url>
     <loc>https://www.statelesssquad.com/buildingbytouching/</loc>
@@ -168,6 +192,6 @@
   </url>
 <url>
     <loc>https://www.statelesssquad.com/stateless-cube/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-29</lastmod>
   </url>
 </urlset>
