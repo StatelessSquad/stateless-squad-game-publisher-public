@@ -1,15 +1,16 @@
 {
   "name": "StateLess-Cube",
   "short_name": "StateLess-Cube",
-  "description": "A high pace merge tile game: nine themes, combos, boosters and 1000 levels.",
+  "description": "Merge matching icons to build the StateLess-Cube: a candy-bright 2048 where the tiles are robots, planets, sweets and gems. Chain merges into combos, earn boosters, and climb 1,000 levels from Newbie to Stateless across nine worlds. No ads, no accounts, plays offline.",
   "start_url": "./",
-  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#08060f",
-  "theme_color": "#08060f",
+  "theme_color": "#7c5cff",
   "icons": [
-    { "src": "assets/icon.png", "sizes": "256x256", "type": "image/png" },
-    { "src": "assets/favicon.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

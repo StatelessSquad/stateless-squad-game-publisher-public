@@ -1,196 +1,159 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
-  <title>StateLess-Cube — a merge tile game by StateLess Squad</title>
-  <meta name="description" content="Merge, chain combos, climb 1000 levels. Nine worlds. No ads, no accounts.">
-
+  <title>StateLess-Cube — Merge. Combo. Climb.</title>
+  <meta name="description" content="A candy-bright 2048: merge matching icons, chain combos, earn boosters and climb 1,000 levels across nine worlds. No ads, no accounts, plays offline.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="keywords" content="2048, merge game, puzzle, combo, emoji, relaxing, offline game">
+  <link rel="canonical" href="https://www.statelesssquad.com/stateless-cube/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="StateLess-Cube">
-  <meta property="og:description" content="Merge. Combo. Climb. Nine worlds, 1000 levels, no ads.">
+  <meta property="og:site_name" content="StateLess Squad">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="StateLess-Cube — Merge. Combo. Climb.">
+  <meta property="og:description" content="A candy-bright 2048: merge matching icons, chain combos, earn boosters and climb 1,000 levels across nine worlds. No ads, no accounts, plays offline.">
   <meta property="og:image" content="https://www.statelesssquad.com/stateless-cube/assets/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="StateLess-Cube: Merge. Combo. Climb.">
+  <meta property="og:url" content="https://www.statelesssquad.com/stateless-cube/">
   <meta name="twitter:card" content="summary_large_image">
-
+  <meta name="twitter:title" content="StateLess-Cube — Merge. Combo. Climb.">
+  <meta name="twitter:description" content="A candy-bright 2048: merge matching icons, chain combos, earn boosters and climb 1,000 levels across nine worlds. No ads, no accounts, plays offline.">
+  <meta name="twitter:image" content="https://www.statelesssquad.com/stateless-cube/assets/og.png">
+  <meta name="twitter:image:alt" content="StateLess-Cube: Merge. Combo. Climb.">
   <meta name="theme-color" content="#08060f">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="StateLess-Cube">
-  <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/icon.png">
-  <link rel="preload" as="image" href="assets/shots/poster.webp">
+  <link rel="preload" as="image" href="assets/shots/hero.webp">
   <link rel="stylesheet" href="assets/style.css">
-  <link rel="canonical" href="https://www.statelesssquad.com/stateless-cube/">
-  <meta property="og:url" content="https://www.statelesssquad.com/stateless-cube/">
-  <meta property="og:site_name" content="StateLess Squad">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.statelesssquad.com/#org","name":"StateLess Squad","url":"https://www.statelesssquad.com/"},{"@type":"VideoGame","@id":"https://www.statelesssquad.com/stateless-cube/#game","name":"StateLess-Cube","description":"Merge, chain combos, climb 1000 levels. Nine worlds. No ads, no accounts.","url":"https://www.statelesssquad.com/stateless-cube/","image":"https://www.statelesssquad.com/stateless-cube/assets/og.png","screenshot":[],"genre":"Puzzle","inLanguage":"en","gamePlatform":["iOS","Android","Web browser"],"operatingSystem":"iOS, Android, Web","applicationCategory":"GameApplication","isAccessibleForFree":true,"author":{"@id":"https://www.statelesssquad.com/#org"},"publisher":{"@id":"https://www.statelesssquad.com/#org"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"StateLess Squad","item":"https://www.statelesssquad.com/"},{"@type":"ListItem","position":2,"name":"StateLess-Cube","item":"https://www.statelesssquad.com/stateless-cube/"}]}]}</script>
-  <style>footer .wrap{flex-wrap:wrap}footer .foot-note{flex:0 0 100%;margin:0;font-size:.82rem;line-height:1.5}footer .foot-note span{display:block;max-width:78ch}footer .foot-note a{display:inline}@media (max-width:640px){footer .foot-note span{margin:0 auto;text-align:center}}</style>
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.statelesssquad.com/#org","name":"StateLess Squad","url":"https://www.statelesssquad.com/"},{"@type":"VideoGame","@id":"https://www.statelesssquad.com/stateless-cube/#game","name":"StateLess-Cube","description":"Merge matching icons to build the StateLess-Cube: a candy-bright 2048 where the tiles are robots, planets, sweets and gems. Chain merges into combos, earn boosters, and climb 1,000 levels from Newbie to Stateless across nine worlds. No ads, no accounts, plays offline.","url":"https://www.statelesssquad.com/stateless-cube/","image":"https://www.statelesssquad.com/stateless-cube/assets/og.png","screenshot":["https://www.statelesssquad.com/stateless-cube/assets/shots/hero.webp","https://www.statelesssquad.com/stateless-cube/assets/shots/candy.webp","https://www.statelesssquad.com/stateless-cube/assets/shots/space.webp","https://www.statelesssquad.com/stateless-cube/assets/shots/robots.webp","https://www.statelesssquad.com/stateless-cube/assets/shots/combo.webp","https://www.statelesssquad.com/stateless-cube/assets/shots/levels.webp"],"genre":"Puzzle","keywords":"2048, merge game, puzzle, combo, emoji, relaxing, offline game","inLanguage":"en","gamePlatform":["iOS","Android","Web browser"],"operatingSystem":"iOS, Android, Web","applicationCategory":"GameApplication","isAccessibleForFree":true,"author":{"@id":"https://www.statelesssquad.com/#org"},"publisher":{"@id":"https://www.statelesssquad.com/#org"},"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"trailer":{"@type":"VideoObject","name":"StateLess-Cube gameplay","description":"Merge. Combo. Climb.","thumbnailUrl":"https://www.statelesssquad.com/stateless-cube/assets/shots/hero.webp","contentUrl":"https://www.statelesssquad.com/stateless-cube/assets/demo.mp4","uploadDate":"2026-10-30"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"StateLess Squad","item":"https://www.statelesssquad.com/"},{"@type":"ListItem","position":2,"name":"StateLess-Cube","item":"https://www.statelesssquad.com/stateless-cube/"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"How do I play?","acceptedAnswer":{"@type":"Answer","text":"Swipe, or use the arrow keys. Matching icons merge into the next one, and a new icon appears after every move. Build the StateLess-Cube (the 2048 tile) to win, then keep going."}},{"@type":"Question","name":"What is a combo?","acceptedAnswer":{"@type":"Answer","text":"Merge again within about a second and a half and the combo climbs: ×2, ×3 and up. Combos charge the booster meter faster."}},{"@type":"Question","name":"How do I get boosters?","acceptedAnswer":{"@type":"Answer","text":"Every merge charges the meter under the score. A full meter earns a hammer, a shuffle or ×2; tap one in the dock, or press 1, 2 or 3."}},{"@type":"Question","name":"Can I take a move back?","acceptedAnswer":{"@type":"Answer","text":"Yes: undo takes back your last move."}},{"@type":"Question","name":"Does it need the internet?","acceptedAnswer":{"@type":"Answer","text":"No. It plays offline, with no ads, no accounts and no tracking. Your best score and level stay on your device."}}]}]}</script>
 </head>
 <body>
-  <!-- Brand marks (inline, so the page has no external requests) -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <symbol id="mark-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
-    <symbol id="mark-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
-    <symbol id="mark-play" viewBox="0 0 24 24"><path fill="#00A0FF" d="M1.1 1.4C1 1.7 1 2.1 1 2.6v18.8c0 .5 0 .9.1 1.2l.1.1L12 12l.1-.1L1.2 1.3l-.1.1z"/><path fill="#FFD400" d="M15.1 8.4l-3.1-3.1-.1.1L4.3 13l.1.1 7.6 7.6 3.1-3.1c.8-.8.8-2 0-2.8l-3-2.7z"/><path fill="#F342A9" d="M15.1 8.4L12 5.3 1.1 16.2c.2.2.4.3.7.5l11.2-6.3 2.1-2z"/><path fill="#20A5F7" d="M15.1 15.2L3.9 9.9c-.3-.2-.5-.3-.7-.5L15 1.6c.9-.8 1.6-.5 2 .1l6.9 6.9c.8.8.8 2 0 2.8l-6.8 6.8z"/></symbol>
-  </svg>
-
+<symbol id="mark-apple" viewBox="0 0 24 24"><path fill="currentColor" d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
+<symbol id="mark-play" viewBox="0 0 24 24"><path fill="#00A0FF" d="M1.1 1.4C1 1.7 1 2.1 1 2.6v18.8c0 .5 0 .9.1 1.2l.1.1L12 12l.1-.1L1.2 1.3l-.1.1z"/><path fill="#FFD400" d="M15.1 8.4l-3.1-3.1-.1.1L4.3 13l.1.1 7.6 7.6 3.1-3.1c.8-.8.8-2 0-2.8l-3-2.7z"/><path fill="#F342A9" d="M15.1 8.4L12 5.3 1.1 16.2c.2.2.4.3.7.5l11.2-6.3 2.1-2z"/><path fill="#20A5F7" d="M15.1 15.2L3.9 9.9c-.3-.2-.5-.3-.7-.5L15 1.6c.9-.8 1.6-.5 2 .1l6.9 6.9c.8.8.8 2 0 2.8l-6.8 6.8z"/></symbol>
+<symbol id="mark-web" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 6h-3a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8ZM12 4.1c.8 1.1 1.5 2.4 1.9 3.9h-3.8c.4-1.5 1.1-2.8 1.9-3.9ZM4.3 14a8.2 8.2 0 0 1 0-4h3.4a16.5 16.5 0 0 0 0 4H4.3Zm.8 2h3a15.7 15.7 0 0 0 1.4 3.6A8 8 0 0 1 5.1 16Zm3-8h-3a8 8 0 0 1 4.4-3.6A15.7 15.7 0 0 0 8.1 8ZM12 19.9c-.8-1.1-1.5-2.4-1.9-3.9h3.8c-.4 1.5-1.1 2.8-1.9 3.9Zm2.3-5.9H9.7a14.7 14.7 0 0 1 0-4h4.6a14.7 14.7 0 0 1 0 4Zm.3 5.6a15.7 15.7 0 0 0 1.4-3.6h3a8 8 0 0 1-4.4 3.6Zm1.7-5.6a16.5 16.5 0 0 0 0-4h3.4a8.2 8.2 0 0 1 0 4h-3.4Z"/></symbol>
+<symbol id="mark-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></symbol>
+</svg>
   <div class="aurora" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true"></div>
-
   <header class="nav">
     <div class="wrap">
-      <a class="logo" href="#top">
+      <a class="logo" href="./">
         <img src="assets/icon.png" alt="" width="34" height="34">
         StateLess-Cube
       </a>
-      <a class="btn btn-ghost" href="#get">Get the app</a>
+      <a class="btn btn-ghost" href="#get">Get the game</a>
     </div>
   </header>
-
-  <main id="top">
-    <!-- ================================================================ -->
-    <!-- Hero: the name, one line, the stores — and the game itself.       -->
-    <section class="hero">
-      <div class="wrap">
-        <div class="hero-copy">
-          <h1>StateLess<span class="grad">Cube</span></h1>
-          <p class="lede">Merge. Combo. Climb.</p>
-          <div class="stores">
-            <span class="store">
-              <svg class="mark mark-apple" aria-hidden="true"><use href="#mark-apple"/></svg>
-              <span>App Store<small>Coming soon</small></span>
-            </span>
-            <span class="store">
-              <svg class="mark" aria-hidden="true"><use href="#mark-play"/></svg>
-              <span>Google Play<small>Coming soon</small></span>
-            </span>
-          </div>
-        </div>
-
-        <div class="hero-media">
-          <img class="peek peek-l" src="assets/shots/space.webp" alt="" width="560" height="1218" loading="lazy">
-          <img class="peek peek-r" src="assets/shots/robots.webp" alt="" width="560" height="1218" loading="lazy">
-          <div class="phone">
-            <span class="notch" aria-hidden="true"></span>
-            <video
-              poster="assets/shots/poster.webp"
-              autoplay muted loop playsinline preload="none"
-              aria-label="StateLess-Cube gameplay">
+  <main id="top"><section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <h1 style="--chars:13">StateLess<wbr><span class="grad">Cube</span></h1>
+        <p class="lede">Merge. Combo. Climb.</p>
+        <div class="stores">
+    <span class="store"><svg class="mark mark-apple" aria-hidden="true"><use href="#mark-apple"/></svg><span>App Store<small>Coming soon</small></span></span>
+    <span class="store"><svg class="mark" aria-hidden="true"><use href="#mark-play"/></svg><span>Google Play<small>Coming soon</small></span></span>
+    
+  </div>
+      </div>
+      <div class="hero-media">
+        <img class="peek peek-l" src="assets/shots/peek-l.webp" alt="" width="560" height="1214" loading="lazy" decoding="async">
+        <img class="peek peek-r" src="assets/shots/peek-r.webp" alt="" width="560" height="1214" loading="lazy" decoding="async">
+        <div class="phone">
+          <span class="notch" aria-hidden="true"></span>
+          <video poster="assets/shots/hero.webp" autoplay muted loop playsinline preload="none" aria-label="StateLess-Cube gameplay">
               <source src="assets/demo-mobile.mp4" media="(max-width: 640px)" type="video/mp4">
               <source src="assets/demo.mp4" type="video/mp4">
             </video>
-            <button type="button" class="video-play" id="video-play" hidden aria-label="Play the demo">
-              <span aria-hidden="true">&#9654;</span> Play
-            </button>
-          </div>
+            <button type="button" class="video-play" id="video-play" hidden aria-label="Play the demo"><span aria-hidden="true">&#9654;</span> Play</button>
         </div>
       </div>
-    </section>
-
-    <!-- The rules, in three words. -->
-    <section class="rules">
-      <div class="wrap">
-        <div class="rule reveal"><span aria-hidden="true">&#128072;</span> Swipe</div>
-        <div class="rule reveal"><span aria-hidden="true">&#10024;</span> Merge</div>
-        <div class="rule reveal"><span aria-hidden="true">&#127942;</span> Climb</div>
-      </div>
-    </section>
-
-    <!-- ================================================================ -->
-    <!-- Three blocks: a short title, a line, and the art doing the work.  -->
-    <section class="feature">
+    </div>
+  </section><section class="rules" aria-label="How to play">
+    <div class="wrap">
+      <div class="rule reveal"><span aria-hidden="true">👈</span> Swipe</div><div class="rule reveal"><span aria-hidden="true">✨</span> Merge</div><div class="rule reveal"><span aria-hidden="true">🏆</span> Climb</div>
+    </div>
+  </section><section class="feature">
       <div class="wrap">
         <div class="feature-copy reveal">
           <h2>Nine worlds</h2>
-          <p>One tap changes everything.</p>
+          <p>Robots &amp; AI, ABC, Hebrew, Animals, Space, Fruits, Candy, Prism and Pixel: one tap on the rail and every tile on the board changes.</p>
         </div>
         <div class="feature-art reveal">
-          <div class="fan">
-            <img src="assets/shots/candy.webp" alt="The Candy world" loading="lazy" width="560" height="1218">
-            <img src="assets/shots/pixel.webp" alt="The Pixel world" loading="lazy" width="560" height="1218">
-            <img src="assets/shots/animals.webp" alt="The Animals world" loading="lazy" width="560" height="1218">
-          </div>
+          <div class="fan"><img src="assets/shots/candy.webp" alt="Nine worlds: candy" width="560" height="1214" loading="lazy" decoding="async"><img src="assets/shots/space.webp" alt="Nine worlds: space" width="560" height="1214" loading="lazy" decoding="async"><img src="assets/shots/robots.webp" alt="Nine worlds: robots" width="560" height="1214" loading="lazy" decoding="async"></div>
         </div>
       </div>
-    </section>
-
-    <section class="feature feature-flip">
+    </section><section class="feature feature-flip">
       <div class="wrap">
         <div class="feature-copy reveal">
           <h2>Combo chains</h2>
-          <p>Merge again. And again.</p>
+          <p>Merge again within a breath and the combo climbs: the tiles hit harder, the board heats up, and from ×3 a shockwave rolls out.</p>
         </div>
         <div class="feature-art reveal">
-          <div class="single">
-            <img src="assets/shots/action.webp" alt="A combo chain in play" loading="lazy" width="560" height="1218">
-          </div>
+          <div class="single"><img src="assets/shots/combo.webp" alt="Combo chains" width="560" height="1214" loading="lazy" decoding="async"></div>
         </div>
       </div>
-    </section>
-
-    <section class="feature">
+    </section><section class="feature">
       <div class="wrap">
         <div class="feature-copy reveal">
-          <h2><span data-count="1000">1000</span> levels</h2>
-          <p>Newbie to Stateless.</p>
+          <h2>1,000 levels</h2>
+          <p>Every merge climbs the ladder from Newbie to Stateless. A full booster meter earns a hammer, a shuffle or double points.</p>
         </div>
         <div class="feature-art reveal">
-          <div class="single">
-            <img src="assets/shots/prism.webp" alt="The level ladder" loading="lazy" width="560" height="1218">
-          </div>
+          <div class="single"><img src="assets/shots/levels.webp" alt="1,000 levels" width="560" height="1214" loading="lazy" decoding="async"></div>
         </div>
       </div>
-    </section>
-
-    <!-- The worlds, as a shelf. -->
-    <section class="worlds">
-      <div class="wrap">
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#e9e6ff,#7c5cff)">&#129302;</span>Robots</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ffd6e2,#ff8fab)">&#127344;</span>ABC</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#eaf2ff,#0d7fd6)">&#1488;</span>Hebrew</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#d4f2cd,#3fb96b)">&#128059;</span>Animals</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#e6daff,#5b6cff)">&#128640;</span>Space</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ffdada,#ff3d7f)">&#127822;</span>Fruits</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ffdcf4,#ff3fa4)">&#127852;</span>Candy</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#d4efff,#8b5cf6)">&#128160;</span>Prism</div>
-        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#dff7bd,#22c55e)">&#128126;</span>Pixel</div>
+    </section><section class="worlds" aria-label="Nine worlds">
+    <div class="wrap">
+      <h2 class="section-title reveal">Nine worlds</h2>
+      <div class="shelf" style="--wide:9;--narrow:3">
+        <div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#7c5cff,#31d8ff)">🤖</span>Robots &amp; AI</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ff5c9d,#ffb84d)">🅰️</span>ABC</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#0d7fd6,#f5a623)">א״ב</span>Hebrew</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#3fb96b,#ffb020)">🐻</span>Animals</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#5b6cff,#ff5cc8)">🚀</span>Space</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ff3d7f,#ffa62b)">🍎</span>Fruits</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#ff3fa4,#7c5cff)">🍬</span>Candy</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#8b5cf6,#22d3ee)">💠</span>Prism</div><div class="world reveal"><span class="dot" style="background:linear-gradient(135deg,#22c55e,#a855f7)">👾</span>Pixel</div>
       </div>
-    </section>
-
-    <!-- ================================================================ -->
-    <section id="get" class="get">
-      <div class="wrap reveal">
-        <img src="assets/icon.png" alt="" width="88" height="88">
-        <h2>Free. No ads.</h2>
-        <div class="stores">
-          <span class="store">
-            <svg class="mark mark-apple" aria-hidden="true"><use href="#mark-apple"/></svg>
-            <span>App Store<small>Coming soon</small></span>
-          </span>
-          <span class="store">
-            <svg class="mark" aria-hidden="true"><use href="#mark-play"/></svg>
-            <span>Google Play<small>Coming soon</small></span>
-          </span>
-        </div>
+    </div>
+  </section><section class="modes">
+    <div class="wrap">
+      <h2 class="section-title reveal">Three boosters</h2>
+      <div class="mode-grid">
+        <div class="mode reveal"><span class="mode-icon" aria-hidden="true">🔨</span><h3>Hammer</h3><p>Smash one tile out of the way.</p></div><div class="mode reveal"><span class="mode-icon" aria-hidden="true">🔀</span><h3>Shuffle</h3><p>Rearrange the whole board.</p></div><div class="mode reveal"><span class="mode-icon" aria-hidden="true">✨</span><h3>×2</h3><p>Double points for the next five merges.</p></div>
       </div>
-    </section>
-  </main>
-
+    </div>
+  </section><section id="get" class="get">
+    <div class="wrap reveal">
+      <img src="assets/icon.png" alt="" width="88" height="88">
+      <h2>Free. No ads.</h2>
+      
+      <div class="stores">
+    <span class="store"><svg class="mark mark-apple" aria-hidden="true"><use href="#mark-apple"/></svg><span>App Store<small>Coming soon</small></span></span>
+    <span class="store"><svg class="mark" aria-hidden="true"><use href="#mark-play"/></svg><span>Google Play<small>Coming soon</small></span></span>
+    
+  </div>
+      <ul class="promises"><li>No ads</li><li>No accounts</li><li>No tracking</li><li>Plays offline</li></ul>
+    </div>
+  </section><section class="faq">
+    <div class="wrap">
+      <h2 class="section-title reveal">Questions</h2>
+      <details class="reveal"><summary>How do I play?</summary><p>Swipe, or use the arrow keys. Matching icons merge into the next one, and a new icon appears after every move. Build the StateLess-Cube (the 2048 tile) to win, then keep going.</p></details><details class="reveal"><summary>What is a combo?</summary><p>Merge again within about a second and a half and the combo climbs: ×2, ×3 and up. Combos charge the booster meter faster.</p></details><details class="reveal"><summary>How do I get boosters?</summary><p>Every merge charges the meter under the score. A full meter earns a hammer, a shuffle or ×2; tap one in the dock, or press 1, 2 or 3.</p></details><details class="reveal"><summary>Can I take a move back?</summary><p>Yes: undo takes back your last move.</p></details><details class="reveal"><summary>Does it need the internet?</summary><p>No. It plays offline, with no ads, no accounts and no tracking. Your best score and level stay on your device.</p></details>
+    </div>
+  </section></main>
   <footer>
     <div class="wrap">
-      <span>&copy; StateLess Squad</span>
-      <a href="https://github.com/StatelessSquad/StateLessCube-Public">
-        <svg class="mark" aria-hidden="true"><use href="#mark-github"/></svg>
-        GitHub
-      </a>
-    <p class="foot-note"><span>StateLess Squad is the name of an independent, pre-release game project, not a registered company. The games here are free previews, provided as is, without warranty. Nothing on this site is an offer to sell. <a href="https://www.statelesssquad.com/notice/">About this preview</a></span></p>
+      <span>&copy; 2026 StateLess Squad · All rights reserved</span>
+      <nav aria-label="Legal">
+        <a href="https://www.statelesssquad.com/">More games by StateLess Squad</a>
+        <a href="privacy/">Privacy</a>
+        <a href="support/">Support</a>
+        <a href="terms/">Terms</a>
+        <a href="https://github.com/StatelessSquad/StateLessCube-Public"><svg class="mark" aria-hidden="true"><use href="#mark-github"/></svg>GitHub</a>
+      </nav>
+      <p class="foot-note">StateLess Squad is the name of an independent, pre-release game project, not a registered company. The games here are free previews, provided as is, without warranty. Nothing on this site is an offer to sell. <a href="https://www.statelesssquad.com/notice/">About this preview</a></p>
     </div>
   </footer>
-
-  <script src="assets/app.js"></script>
+  <script src="assets/app.js" defer></script>
 </body>
 </html>

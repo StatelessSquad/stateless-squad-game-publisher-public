@@ -2,12 +2,12 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
   <url>
     <loc>https://www.statelesssquad.com/</loc>
-    <lastmod>2026-10-29</lastmod>
+    <lastmod>2026-10-30</lastmod>
     <image:image><image:loc>https://www.statelesssquad.com/assets/og.png</image:loc></image:image>
   </url>
   <url>
     <loc>https://www.statelesssquad.com/notice/</loc>
-    <lastmod>2026-10-29</lastmod>
+    <lastmod>2026-10-30</lastmod>
   </url>
 <url>
     <loc>https://www.statelesssquad.com/stm-defender/</loc>
@@ -35,7 +35,7 @@
   </url>
 <url>
     <loc>https://www.statelesssquad.com/buildingbytouching/</loc>
-    <lastmod>2026-10-26</lastmod>
+    <lastmod>2026-10-30</lastmod>
     <image:image><image:loc>https://www.statelesssquad.com/buildingbytouching/assets/og.png</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/buildingbytouching/assets/shots/hero.webp</image:loc></image:image>
     <image:image><image:loc>https://www.statelesssquad.com/buildingbytouching/assets/shots/crane.webp</image:loc></image:image>
@@ -192,6 +192,26 @@
   </url>
 <url>
     <loc>https://www.statelesssquad.com/stateless-cube/</loc>
-    <lastmod>2026-10-29</lastmod>
+    <lastmod>2026-10-30</lastmod>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/og.png</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/candy.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/space.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/robots.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/combo.webp</image:loc></image:image>
+    <image:image><image:loc>https://www.statelesssquad.com/stateless-cube/assets/shots/levels.webp</image:loc></image:image>
+    <video:video><video:thumbnail_loc>https://www.statelesssquad.com/stateless-cube/assets/shots/hero.webp</video:thumbnail_loc><video:title>StateLess-Cube gameplay</video:title><video:description>Merge. Combo. Climb.</video:description><video:content_loc>https://www.statelesssquad.com/stateless-cube/assets/demo.mp4</video:content_loc></video:video>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stateless-cube/privacy/</loc>
+    <lastmod>2026-10-25</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stateless-cube/support/</loc>
+    <lastmod>2026-10-25</lastmod>
+  </url>
+<url>
+    <loc>https://www.statelesssquad.com/stateless-cube/terms/</loc>
+    <lastmod>2026-10-25</lastmod>
   </url>
 </urlset>
