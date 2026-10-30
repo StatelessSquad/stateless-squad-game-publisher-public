@@ -124,13 +124,26 @@
   const hero = document.querySelector('.hero-x');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+  // WebKit can run this deferred script before style.css has loaded: the
+  // colour tokens then read '' and the hero has no size yet. Whatever needs
+  // them waits for the stylesheet (or for it to fail).
+  const styled = (fn) => {
+    const sheet = document.querySelector('link[rel="stylesheet"]');
+    if (!sheet || sheet.sheet) return fn();
+    sheet.addEventListener('load', fn, { once: true });
+    sheet.addEventListener('error', fn, { once: true });
+  };
+
   /* -- light motes over the hero: the pointer eats the ones it touches --- */
 
   const canvas = document.querySelector('.fx');
-  if (canvas && hero && !reduced) {
+  const motes = () => {
     const ctx = canvas.getContext('2d');
     const css = getComputedStyle(document.documentElement);
-    const colours = ['--accent', '--accent2', '--accent3'].map((v) => css.getPropertyValue(v).trim());
+    // White if a token is missing all the same: a gradient refuses ''.
+    const colours = ['--accent', '--accent2', '--accent3'].map(
+      (v) => css.getPropertyValue(v).trim() || '#ffffff',
+    );
     // One soft sprite per colour, drawn once: no shadowBlur per frame.
     const sprites = colours.map((c) => {
       const sp = document.createElement('canvas');
@@ -225,7 +238,8 @@
       }
     });
     requestAnimationFrame(frame);
-  }
+  };
+  if (canvas && hero && !reduced) styled(motes);
 
   /* -- a soft light under the pointer ---------------------------------- */
 
